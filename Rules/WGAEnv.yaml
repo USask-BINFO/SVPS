@@ -1,0 +1,18 @@
+name: WGAEnv
+channels:
+  - conda-forge
+  - bioconda
+  - r
+  - defaults
+dependencies:
+  - biopython
+  - svim-asm
+  - scipy
+  - mamba
+  - numpy
+  - snakemake
+  - pysam
+  - pandas
+  - matplotlib
+  - matplotlib-venn
+prefix: /student/gwy260/.conda/envs/WGAEnv

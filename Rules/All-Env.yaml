@@ -1,0 +1,24 @@
+name: AllEnv
+channels:
+  - conda-forge
+  - bioconda
+  - r
+  - defaults
+dependencies:
+  - biopython
+  - syri
+  - cutesv
+  - svim
+  - svim-asm
+  - intervaltree
+  - scipy
+  - mamba
+  - numpy
+  - snakemake
+  - pysam
+  - sniffles=2.0
+  - pandas
+  - matplotlib
+  - matplotlib-venn
+  - truvari
+prefix: /student/gwy260/.conda/envs/AllEnv

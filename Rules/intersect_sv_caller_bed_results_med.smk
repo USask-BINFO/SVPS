@@ -1,0 +1,450 @@
+rule bedtools_intersect_svps_w_syri_mummer_Med_ref:
+        input:
+                setOneDEL=str(SVPS_REF_PREFIX + ".DEL.Med.bed"),
+                setOneINS=str(SVPS_REF_PREFIX + ".INS.Med.bed"),
+                setOneDUP=str(SVPS_REF_PREFIX + ".DUP.Med.bed"),
+                setOneINV=str(SVPS_REF_PREFIX + ".INV.Med.bed"),
+                setOneTRANS=str(SVPS_REF_PREFIX + ".TRANS.Med.bed"),
+                setTwoDEL=str(SYRI_REF_PREFIX +".syri.mummer.final.DEL.Med.bed"),
+                setTwoINS=str(SYRI_REF_PREFIX +".syri.mummer.final.INS.Med.bed"),
+                setTwoDUP=str(SYRI_REF_PREFIX +".syri.mummer.final.DUP.Med.bed"),
+                setTwoINV=str(SYRI_REF_PREFIX +".syri.mummer.final.INV.Med.bed"),
+                setTwoTRANS=str(SYRI_REF_PREFIX +".syri.mummer.final.TRANS.Med.bed"),
+        output:
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SVPS.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SVPS.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SVPS.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SVPS.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SVPS.TRANS.Med.bed"),
+
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SYRI-MUM.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SYRI-MUM.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SYRI-MUM.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SYRI-MUM.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SYRI-MUM.TRANS.Med.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/Bedtools.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                minOverlap=config["overlapThreshold"],
+                outputDir=config["bedtoolsResultsFolder"],
+                toolA="SVPS",
+                toolB="SYRI-MUM",
+                toolsPrefix="SVPS-SYRI-MUM"
+        shell:
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDEL} {input.setTwoDEL} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DEL Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINS} {input.setTwoINS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INS Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDUP} {input.setTwoDUP} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DUP Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINV} {input.setTwoINV} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INV Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneTRANS} {input.setTwoTRANS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} TRANS Med"
+
+#               "bedtools intersect -f {params.minOverlap} -F {params.minOverlap} -wa -a {input.setOneDEL} -b {input.setTwoDEL} | sort -k 1,1 -k 2,2n | uniq > {params.outputDir}/{params.toolsPrefix}/REF/{params.toolA}.DEL.Med.bed;\n"
+#               "bedtools intersect -f {params.minOverlap} -F {params.minOverlap} -wa -a {input.setOneINS} -b {input.setTwoINS} | sort -k 1,1 -k 2,2n | uniq > {params.outputDir}/{params.toolsPrefix}/REF/{params.toolA}.INS.Med.bed;\n"
+#               "bedtools intersect -f {params.minOverlap} -F {params.minOverlap} -wa -a {input.setOneDUP} -b {input.setTwoDUP} | sort -k 1,1 -k 2,2n | uniq > {params.outputDir}/{params.toolsPrefix}/REF/{params.toolA}.DUP.Med.bed;\n"
+#               "bedtools intersect -f {params.minOverlap} -F {params.minOverlap} -wa -a {input.setOneINV} -b {input.setTwoINV} | sort -k 1,1 -k 2,2n | uniq > {params.outputDir}/{params.toolsPrefix}/REF/{params.toolA}.INV.Med.bed;\n"
+#               "bedtools intersect -f {params.minOverlap} -F {params.minOverlap} -wa -a {input.setOneTRANS} -b {input.setTwoTRANS} | sort -k 1,1 -k 2,2n | uniq > {params.outputDir}/{params.toolsPrefix}/REF/{params.toolA}.TRANS.Med.bed;\n"
+#               "bedtools intersect -f {params.minOverlap} -F {params.minOverlap} -wb -a {input.setOneDEL} -b {input.setTwoDEL} | sort -k 1,1 -k 2,2n | uniq > {params.outputDir}/{params.toolsPrefix}/REF/{params.toolB}.DEL.Med.bed;\n"
+#               "bedtools intersect -f {params.minOverlap} -F {params.minOverlap} -wb -a {input.setOneINS} -b {input.setTwoINS} | sort -k 1,1 -k 2,2n | uniq > {params.outputDir}/{params.toolsPrefix}/REF/{params.toolB}.INS.Med.bed;\n"
+#               "bedtools intersect -f {params.minOverlap} -F {params.minOverlap} -wb -a {input.setOneDUP} -b {input.setTwoDUP} | sort -k 1,1 -k 2,2n | uniq > {params.outputDir}/{params.toolsPrefix}/REF/{params.toolB}.DUP.Med.bed;\n"
+#               "bedtools intersect -f {params.minOverlap} -F {params.minOverlap} -wb -a {input.setOneINV} -b {input.setTwoINV} | sort -k 1,1 -k 2,2n | uniq > {params.outputDir}/{params.toolsPrefix}/REF/{params.toolB}.INV.Med.bed;\n"
+#               "bedtools intersect -f {params.minOverlap} -F {params.minOverlap} -wb -a {input.setOneTRANS} -b {input.setTwoTRANS} | sort -k 1,1 -k 2,2n | uniq > {params.outputDir}/{params.toolsPrefix}/REF/{params.toolB}.TRANS.Med.bed"
+
+rule bedtools_intersect_svps_w_syri_minimap_Med_ref:
+        input:
+                setOneDEL=str(SVPS_REF_PREFIX + ".DEL.Med.bed"),
+                setOneINS=str(SVPS_REF_PREFIX + ".INS.Med.bed"),
+                setOneDUP=str(SVPS_REF_PREFIX + ".DUP.Med.bed"),
+                setOneINV=str(SVPS_REF_PREFIX + ".INV.Med.bed"),
+                setOneTRANS=str(SVPS_REF_PREFIX + ".TRANS.Med.bed"),
+                setTwoDEL=str(SYRI_REF_PREFIX +".syri.minimap.final.DEL.Med.bed"),
+                setTwoINS=str(SYRI_REF_PREFIX +".syri.minimap.final.INS.Med.bed"),
+                setTwoDUP=str(SYRI_REF_PREFIX +".syri.minimap.final.DUP.Med.bed"),
+                setTwoINV=str(SYRI_REF_PREFIX +".syri.minimap.final.INV.Med.bed"),
+                setTwoTRANS=str(SYRI_REF_PREFIX +".syri.minimap.final.TRANS.Med.bed"),
+        output:
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SVPS.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SVPS.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SVPS.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SVPS.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SVPS.TRANS.Med.bed"),
+
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SYRI-MINI.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SYRI-MINI.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SYRI-MINI.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SYRI-MINI.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SYRI-MINI.TRANS.Med.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/Bedtools.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                minOverlap=config["overlapThreshold"],
+                outputDir=config["bedtoolsResultsFolder"],
+                toolA="SVPS",
+                toolB="SYRI-MINI",
+                toolsPrefix="SVPS-SYRI-MINI"
+        shell:
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDEL} {input.setTwoDEL} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DEL Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINS} {input.setTwoINS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INS Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDUP} {input.setTwoDUP} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DUP Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINV} {input.setTwoINV} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INV Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneTRANS} {input.setTwoTRANS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} TRANS Med"
+
+rule bedtools_intersect_mumco_w_svps_Med_ref:
+        input:
+                setOneDEL=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DEL.Med.bed"),
+                setOneINS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INS.Med.bed"),
+                setOneDUP=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DUP.Med.bed"),
+                setOneINV=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INV.Med.bed"),
+                setOneTRANS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_TRANS.Med.bed"),
+                setTwoDEL=str(SVPS_REF_PREFIX + ".DEL.Med.bed"),
+                setTwoINS=str(SVPS_REF_PREFIX + ".INS.Med.bed"),
+                setTwoDUP=str(SVPS_REF_PREFIX + ".DUP.Med.bed"),
+                setTwoINV=str(SVPS_REF_PREFIX + ".INV.Med.bed"),
+                setTwoTRANS=str(SVPS_REF_PREFIX + ".TRANS.Med.bed")
+        output:
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/MUMCO.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/MUMCO.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/MUMCO.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/MUMCO.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/MUMCO.TRANS.Med.bed"),
+
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/SVPS.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/SVPS.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/SVPS.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/SVPS.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/SVPS.TRANS.Med.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/Bedtools.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                minOverlap=config["overlapThreshold"],
+                outputDir=config["bedtoolsResultsFolder"],
+                toolA="MUMCO",
+                toolB="SVPS",
+                toolsPrefix="MUMCO-SVPS"
+        shell:
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDEL} {input.setTwoDEL} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DEL Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINS} {input.setTwoINS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INS Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDUP} {input.setTwoDUP} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DUP Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINV} {input.setTwoINV} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INV Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneTRANS} {input.setTwoTRANS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} TRANS Med"
+
+rule bedtools_intersect_mumco_w_syri_mummer_Med_ref:
+        input:
+                setOneDEL=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DEL.Med.bed"),
+                setOneINS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INS.Med.bed"),
+                setOneDUP=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DUP.Med.bed"),
+                setOneINV=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INV.Med.bed"),
+                setOneTRANS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_TRANS.Med.bed"),
+                setTwoDEL=str(SYRI_REF_PREFIX +".syri.mummer.final.DEL.Med.bed"),
+                setTwoINS=str(SYRI_REF_PREFIX +".syri.mummer.final.INS.Med.bed"),
+                setTwoDUP=str(SYRI_REF_PREFIX +".syri.mummer.final.DUP.Med.bed"),
+                setTwoINV=str(SYRI_REF_PREFIX +".syri.mummer.final.INV.Med.bed"),
+                setTwoTRANS=str(SYRI_REF_PREFIX +".syri.mummer.final.TRANS.Med.bed")
+        output:
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MUM/REF/MUMCO.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MUM/REF/MUMCO.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MUM/REF/MUMCO.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MUM/REF/MUMCO.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MUM/REF/MUMCO.TRANS.Med.bed"),
+
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MUM/REF/SYRI-MUM.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MUM/REF/SYRI-MUM.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MUM/REF/SYRI-MUM.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MUM/REF/SYRI-MUM.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MUM/REF/SYRI-MUM.TRANS.Med.bed") 
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/Bedtools.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                minOverlap=config["overlapThreshold"],
+                outputDir=config["bedtoolsResultsFolder"],
+                toolA="MUMCO",
+                toolB="SYRI-MUM",
+                toolsPrefix="MUMCO-SYRI-MUM"
+        shell:
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDEL} {input.setTwoDEL} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DEL Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINS} {input.setTwoINS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INS Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDUP} {input.setTwoDUP} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DUP Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINV} {input.setTwoINV} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INV Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneTRANS} {input.setTwoTRANS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} TRANS Med"
+
+rule bedtools_intersect_mumco_w_syri_minimap_Med_ref:
+        input:
+                setOneDEL=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DEL.Med.bed"),
+                setOneINS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INS.Med.bed"),
+                setOneDUP=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DUP.Med.bed"),
+                setOneINV=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INV.Med.bed"),
+                setOneTRANS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_TRANS.Med.bed"),
+                setTwoDEL=str(SYRI_REF_PREFIX +".syri.minimap.final.DEL.Med.bed"),
+                setTwoINS=str(SYRI_REF_PREFIX +".syri.minimap.final.INS.Med.bed"),
+                setTwoDUP=str(SYRI_REF_PREFIX +".syri.minimap.final.DUP.Med.bed"),
+                setTwoINV=str(SYRI_REF_PREFIX +".syri.minimap.final.INV.Med.bed"),
+                setTwoTRANS=str(SYRI_REF_PREFIX +".syri.minimap.final.TRANS.Med.bed")
+        output:
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI/REF/MUMCO.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI/REF/MUMCO.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI/REF/MUMCO.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI/REF/MUMCO.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI/REF/MUMCO.TRANS.Med.bed"),
+
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI/REF/SYRI-MINI.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI/REF/SYRI-MINI.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI/REF/SYRI-MINI.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI/REF/SYRI-MINI.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI/REF/SYRI-MINI.TRANS.Med.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/Bedtools.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                minOverlap=config["overlapThreshold"],
+                outputDir=config["bedtoolsResultsFolder"],
+                toolA="MUMCO",
+                toolB="SYRI-MINI",
+                toolsPrefix="MUMCO-SYRI-MINI"
+        shell:
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDEL} {input.setTwoDEL} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DEL Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINS} {input.setTwoINS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INS Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDUP} {input.setTwoDUP} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DUP Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINV} {input.setTwoINV} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INV Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneTRANS} {input.setTwoTRANS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} TRANS Med"
+
+rule bedtools_intersect_syri_minimap_w_syri_mummer_Med_ref:
+        input:
+                setOneDEL=str(SYRI_REF_PREFIX +".syri.minimap.final.DEL.Med.bed"),
+                setOneINS=str(SYRI_REF_PREFIX +".syri.minimap.final.INS.Med.bed"),
+                setOneDUP=str(SYRI_REF_PREFIX +".syri.minimap.final.DUP.Med.bed"),
+                setOneINV=str(SYRI_REF_PREFIX +".syri.minimap.final.INV.Med.bed"),
+                setOneTRANS=str(SYRI_REF_PREFIX +".syri.minimap.final.TRANS.Med.bed"),
+                setTwoDEL=str(SYRI_REF_PREFIX +".syri.mummer.final.DEL.Med.bed"),
+                setTwoINS=str(SYRI_REF_PREFIX +".syri.mummer.final.INS.Med.bed"),
+                setTwoDUP=str(SYRI_REF_PREFIX +".syri.mummer.final.DUP.Med.bed"),
+                setTwoINV=str(SYRI_REF_PREFIX +".syri.mummer.final.INV.Med.bed"),
+                setTwoTRANS=str(SYRI_REF_PREFIX +".syri.mummer.final.TRANS.Med.bed"),
+        output:
+                str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.TRANS.Med.bed"),
+
+                str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MUM.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MUM.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MUM.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MUM.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MUM.TRANS.Med.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/Bedtools.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                minOverlap=config["overlapThreshold"],
+                outputDir=config["bedtoolsResultsFolder"],
+                toolA="SYRI-MINI",
+                toolB="SYRI-MUM",
+                toolsPrefix="SYRI-MINI-SYRI-MUM"
+        shell:
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDEL} {input.setTwoDEL} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DEL Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINS} {input.setTwoINS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INS Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDUP} {input.setTwoDUP} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DUP Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINV} {input.setTwoINV} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INV Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneTRANS} {input.setTwoTRANS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} TRANS Med"
+
+rule bedtools_intersect_svps_syri_minimap_syri_mummer_Med_ref:
+        input:
+                setOneDEL=str(SVPS_REF_PREFIX + ".DEL.Med.bed"),
+                setOneINS=str(SVPS_REF_PREFIX + ".INS.Med.bed"),
+                setOneDUP=str(SVPS_REF_PREFIX + ".DUP.Med.bed"),
+                setOneINV=str(SVPS_REF_PREFIX + ".INV.Med.bed"),
+                setOneTRANS=str(SVPS_REF_PREFIX + ".TRANS.Med.bed"),
+                setTwoDEL=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.DEL.Med.bed"),
+                setTwoINS=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.INS.Med.bed"),
+                setTwoDUP=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.DUP.Med.bed"),
+                setTwoINV=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.INV.Med.bed"),
+                setTwoTRANS=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.TRANS.Med.bed"),
+        output:
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI-SYRI-MUM/REF/SVPS.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI-SYRI-MUM/REF/SVPS.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI-SYRI-MUM/REF/SVPS.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI-SYRI-MUM/REF/SVPS.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI-SYRI-MUM/REF/SVPS.TRANS.Med.bed"),
+
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.TRANS.Med.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/Bedtools.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                minOverlap=config["overlapThreshold"],
+                outputDir=config["bedtoolsResultsFolder"],
+                toolA="SVPS",
+                toolB="SYRI-MINI-SYRI-MUM",
+                toolsPrefix="SVPS-SYRI-MINI-SYRI-MUM"
+        shell:
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDEL} {input.setTwoDEL} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DEL Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINS} {input.setTwoINS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INS Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDUP} {input.setTwoDUP} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DUP Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINV} {input.setTwoINV} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INV Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneTRANS} {input.setTwoTRANS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} TRANS Med"
+
+rule bedtools_intersect_mumco_syri_minimap_syri_mummer_Med_ref:
+        input:
+                setOneDEL=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DEL.Med.bed"),
+                setOneINS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INS.Med.bed"),
+                setOneDUP=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DUP.Med.bed"),
+                setOneINV=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INV.Med.bed"),
+                setOneTRANS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_TRANS.Med.bed"),
+                setTwoDEL=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.DEL.Med.bed"),
+                setTwoINS=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.INS.Med.bed"),
+                setTwoDUP=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.DUP.Med.bed"),
+                setTwoINV=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.INV.Med.bed"),
+                setTwoTRANS=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.TRANS.Med.bed"),
+        output:
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI-SYRI-MUM/REF/MUMCO.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI-SYRI-MUM/REF/MUMCO.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI-SYRI-MUM/REF/MUMCO.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI-SYRI-MUM/REF/MUMCO.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI-SYRI-MUM/REF/MUMCO.TRANS.Med.bed"),
+
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.TRANS.Med.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/Bedtools.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                minOverlap=config["overlapThreshold"],
+                outputDir=config["bedtoolsResultsFolder"],
+                toolA="MUMCO",
+                toolB="SYRI-MINI-SYRI-MUM",
+                toolsPrefix="MUMCO-SYRI-MINI-SYRI-MUM"
+        shell:
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDEL} {input.setTwoDEL} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DEL Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINS} {input.setTwoINS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INS Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDUP} {input.setTwoDUP} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DUP Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINV} {input.setTwoINV} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INV Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneTRANS} {input.setTwoTRANS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} TRANS Med"
+
+rule bedtools_intersect_mumco_svps_syri_mummer_Med_ref:
+        input:
+                setOneDEL=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DEL.Med.bed"),
+                setOneINS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INS.Med.bed"),
+                setOneDUP=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DUP.Med.bed"),
+                setOneINV=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INV.Med.bed"),
+                setOneTRANS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_TRANS.Med.bed"),
+                setTwoDEL=str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SVPS.DEL.Med.bed"),
+                setTwoINS=str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SVPS.INS.Med.bed"),
+                setTwoDUP=str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SVPS.DUP.Med.bed"),
+                setTwoINV=str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SVPS.INV.Med.bed"),
+                setTwoTRANS=str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MUM/REF/SVPS.TRANS.Med.bed"),
+        output:
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MUM/REF/MUMCO.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MUM/REF/MUMCO.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MUM/REF/MUMCO.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MUM/REF/MUMCO.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MUM/REF/MUMCO.TRANS.Med.bed"),
+
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MUM/REF/SVPS-SYRI-MUM.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MUM/REF/SVPS-SYRI-MUM.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MUM/REF/SVPS-SYRI-MUM.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MUM/REF/SVPS-SYRI-MUM.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MUM/REF/SVPS-SYRI-MUM.TRANS.Med.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/Bedtools.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                minOverlap=config["overlapThreshold"],
+                outputDir=config["bedtoolsResultsFolder"],
+                toolA="MUMCO",
+                toolB="SVPS-SYRI-MUM",
+                toolsPrefix="MUMCO-SVPS-SYRI-MUM"
+        shell:
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDEL} {input.setTwoDEL} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DEL Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINS} {input.setTwoINS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INS Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDUP} {input.setTwoDUP} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DUP Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINV} {input.setTwoINV} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INV Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneTRANS} {input.setTwoTRANS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} TRANS Med"
+
+rule bedtools_intersect_mumco_svps_syri_minimap_Med_ref:
+        input:
+                setOneDEL=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DEL.Med.bed"),
+                setOneINS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INS.Med.bed"),
+                setOneDUP=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DUP.Med.bed"),
+                setOneINV=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INV.Med.bed"),
+                setOneTRANS=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_TRANS.Med.bed"),
+                setTwoDEL=str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SVPS.DEL.Med.bed"),
+                setTwoINS=str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SVPS.INS.Med.bed"),
+                setTwoDUP=str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SVPS.DUP.Med.bed"),
+                setTwoINV=str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SVPS.INV.Med.bed"),
+                setTwoTRANS=str(config["bedtoolsResultsFolder"] + "/SVPS-SYRI-MINI/REF/SVPS.TRANS.Med.bed"),
+        output:
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI/REF/MUMCO.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI/REF/MUMCO.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI/REF/MUMCO.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI/REF/MUMCO.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI/REF/MUMCO.TRANS.Med.bed"),
+
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI/REF/SVPS-SYRI-MINI.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI/REF/SVPS-SYRI-MINI.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI/REF/SVPS-SYRI-MINI.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI/REF/SVPS-SYRI-MINI.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI/REF/SVPS-SYRI-MINI.TRANS.Med.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/Bedtools.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                minOverlap=config["overlapThreshold"],
+                outputDir=config["bedtoolsResultsFolder"],
+                toolA="MUMCO",
+                toolB="SVPS-SYRI-MINI",
+                toolsPrefix="MUMCO-SVPS-SYRI-MINI"
+        shell:
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDEL} {input.setTwoDEL} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DEL Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINS} {input.setTwoINS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INS Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDUP} {input.setTwoDUP} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DUP Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINV} {input.setTwoINV} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INV Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneTRANS} {input.setTwoTRANS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} TRANS Med"
+
+rule bedtools_intersect_mumco_svps_syri_minimap_syri_mummer_Med_ref:
+        input:
+                setOneDEL=str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/MUMCO.DEL.Med.bed"),
+                setOneINS=str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/MUMCO.INS.Med.bed"),
+                setOneDUP=str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/MUMCO.DUP.Med.bed"),
+                setOneINV=str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/MUMCO.INV.Med.bed"),
+                setOneTRANS=str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS/REF/MUMCO.TRANS.Med.bed"),
+                setTwoDEL=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.DEL.Med.bed"),
+                setTwoINS=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.INS.Med.bed"),
+                setTwoDUP=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.DUP.Med.bed"),
+                setTwoINV=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.INV.Med.bed"),
+                setTwoTRANS=str(config["bedtoolsResultsFolder"] + "/SYRI-MINI-SYRI-MUM/REF/SYRI-MINI.TRANS.Med.bed"),
+        output:
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI-SYRI-MUM/REF/MUMCO-SVPS.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI-SYRI-MUM/REF/MUMCO-SVPS.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI-SYRI-MUM/REF/MUMCO-SVPS.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI-SYRI-MUM/REF/MUMCO-SVPS.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI-SYRI-MUM/REF/MUMCO-SVPS.TRANS.Med.bed"),
+
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.DEL.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.INS.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.DUP.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.INV.Med.bed"),
+                str(config["bedtoolsResultsFolder"] + "/MUMCO-SVPS-SYRI-MINI-SYRI-MUM/REF/SYRI-MINI-SYRI-MUM.TRANS.Med.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/Bedtools.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                minOverlap=config["overlapThreshold"],
+                outputDir=config["bedtoolsResultsFolder"],
+                toolA="MUMCO-SVPS",
+                toolB="SYRI-MINI-SYRI-MUM",
+                toolsPrefix="MUMCO-SVPS-SYRI-MINI-SYRI-MUM"
+        shell:
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDEL} {input.setTwoDEL} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DEL Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINS} {input.setTwoINS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INS Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneDUP} {input.setTwoDUP} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} DUP Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneINV} {input.setTwoINV} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} INV Med;\n"
+                "bash ./Scripts/bedtools-intersect-bed-files.sh REF {params.minOverlap} {input.setOneTRANS} {input.setTwoTRANS} {params.outputDir} {params.toolsPrefix} {params.toolA} {params.toolB} TRANS Med"

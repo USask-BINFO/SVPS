@@ -1,0 +1,10 @@
+name: SyRIEnv
+channels:
+  - bioconda
+  - conda-forge
+  - r
+  - defaults
+dependencies:
+  - syri
+  - pandas=0.23.4
+prefix: /student/gwy260/.conda/envs/SyRIEnv
