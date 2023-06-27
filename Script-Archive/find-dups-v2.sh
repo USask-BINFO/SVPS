@@ -79,24 +79,37 @@ for((EACH_INDEX=0;EACH_INDEX<ARR_LEN;EACH_INDEX++)) do #-1
                                 DUP_QRY_END=$((DUP_QRY_START-DUP_LEN))
                         fi
 
-                        HIGHEST_QRY_CHR=${HIGHEST_ROW[5]}
-                        HIGHEST_QRY_DIR_VAL=${HIGHEST_ROW[6]}
-                        HIGHEST_REF_START=${HIGHEST_ROW[2]}
-                        HIGHEST_QRY_START=${HIGHEST_ROW[7]}
-                        OFFSET_DIST=$((DUP_REF_START-HIGHEST_REF_START)) #Offset to extract index range that is the same distance inside highest QRY alignment as the REF region.
-                        HIGHEST_DUP_QRY_START=$((HIGHEST_QRY_START+OFFSET_DIST))
-
-                        if [ ${HIGHEST_ROW[7]} -lt ${HIGHEST_ROW[8]} ]
-                        then
-                                HIGHEST_DUP_QRY_START=$((HIGHEST_QRY_START+OFFSET_DIST))
-                                HIGHEST_DUP_QRY_END=$((HIGHEST_DUP_QRY_START+DUP_LEN))
-                        else
-                                HIGHEST_DUP_QRY_START=$((HIGHEST_QRY_START-OFFSET_DIST))
-                                HIGHEST_DUP_QRY_END=$((HIGHEST_DUP_QRY_START-DUP_LEN))
-                        fi
-
-                        DUPS_ARR+=("$REF_CHR $REF_DIR_VAL $DUP_REF_START $DUP_REF_END $HIGHEST_QRY_CHR $HIGHEST_QRY_DIR_VAL $HIGHEST_DUP_QRY_START $HIGHEST_DUP_QRY_END $DUP_LEN DUP ${HIGHEST_ROW[10]}")
-                        NEW_OVERLAP=1 # Set New Overlap to false to prevent repeated entries
+                        #If the first time overlapping current highest index, write the duplicated entry for the Highest's entry to date (only need the overlap's qry info, ref should be the same)
+                        #if [ $NEW_OVERLAP -eq 0 ]
+                        #then
+				#echo ${HIGHEST_ROW[@]}
+                                         HIGHEST_QRY_CHR=${HIGHEST_ROW[5]}
+                                         HIGHEST_QRY_DIR_VAL=${HIGHEST_ROW[6]}
+                                ## If current entry completely overlapped by highest, use calculate correct index range in qry highest, else derive query location from highest entry's coordinates
+                                #if [ ${HIGHEST_ROW[3]} -lt $HIGHEST_END  ]
+                                #then
+                                         #HIGHEST_QRY_CHR=${HIGHEST_ROW[5]}
+                                         #HIGHEST_QRY_DIR_VAL=${HIGHEST_ROW[6]}
+                                         HIGHEST_REF_START=${HIGHEST_ROW[2]}
+                                         HIGHEST_QRY_START=${HIGHEST_ROW[7]}
+                                         OFFSET_DIST=$((DUP_REF_START-HIGHEST_REF_START)) #Offset to extract index range that is the same distance inside highest QRY alignment as the REF region.
+                                         HIGHEST_DUP_QRY_START=$((HIGHEST_QRY_START+OFFSET_DIST))
+                                ##else
+                                ##         #HIGHEST_QRY_CHR=${HIGHEST_ROW[5]}
+                                ##         #HIGHEST_QRY_DIR_VAL=${HIGHEST_ROW[6]}
+                                ##         HIGHEST_DUP_QRY_START=${HIGHEST_ROW[7]} #If not ful
+				#fi
+                                if [ ${HIGHEST_ROW[7]} -lt ${HIGHEST_ROW[8]} ]
+                                then
+                                        HIGHEST_DUP_QRY_START=$((HIGHEST_QRY_START+OFFSET_DIST))
+                                        HIGHEST_DUP_QRY_END=$((HIGHEST_DUP_QRY_START+DUP_LEN))
+                                else
+                                        HIGHEST_DUP_QRY_START=$((HIGHEST_QRY_START-OFFSET_DIST))
+                                        HIGHEST_DUP_QRY_END=$((HIGHEST_DUP_QRY_START-DUP_LEN))
+                                fi
+                                DUPS_ARR+=("$REF_CHR $REF_DIR_VAL $DUP_REF_START $DUP_REF_END $HIGHEST_QRY_CHR $HIGHEST_QRY_DIR_VAL $HIGHEST_DUP_QRY_START $HIGHEST_DUP_QRY_END $DUP_LEN DUP ${HIGHEST_ROW[10]}")
+                                NEW_OVERLAP=1 # Set New Overlap to false to prevent repeated entries
+                        #fi
                         DUPS_ARR+=("$REF_CHR $REF_DIR_VAL $DUP_REF_START $DUP_REF_END $QRY_CHR $QRY_DIR_VAL $DUP_QRY_START $DUP_QRY_END $DUP_LEN DUP ${CURR_ROW_ARRAY[10]}")
                 fi
         fi
@@ -116,4 +129,3 @@ printf "%s\n" "${DUPS_ARR[@]}" > $OUTPUT_FILE
 TEMP_FILE="./Temp.coord"
 sort -k1,1 -k3,3n -k4,4n -k5,5 -k7,7n -k8,8n $OUTPUT_FILE > $TEMP_FILE
 uniq $TEMP_FILE > $OUTPUT_FILE
-rm $TEMP_FILE

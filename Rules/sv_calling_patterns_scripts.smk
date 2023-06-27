@@ -54,11 +54,11 @@ rule find_qry_insertion_gap_locations:
         shell:
                 "bash ./Scripts/find-gaps.sh {params.svType} {input} {output} {params.minSize}"
 
-rule find_ref_duplication_locations:
+rule find_ref_repeated_locations:
         input:
                 str(MUMMER_REF_PREFIX + ".reformatted.coords")
         output:
-                str(SVPS_REF_PREFIX + ".DUP.coords")
+                str(SVPS_REF_PREFIX + ".Repeat.coords")
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
@@ -67,11 +67,24 @@ rule find_ref_duplication_locations:
         shell:
                 "bash ./Scripts/find-dups.sh {input} {output} {params}"
 
-rule find_qry_duplication_locations:
+rule find_ref_dup_locations_from_repeats:
+        input:
+                str(SVPS_REF_PREFIX + ".Repeat.coords")
+        output:
+                str(SVPS_REF_PREFIX + ".DUP.coords")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                config["svMinSize"]
+        shell:
+                "python ./Scripts/find-cnvs-graph.py {input} {output}"
+
+rule find_qry_repeated_locations:
         input:
                 str(MUMMER_QRY_PREFIX + ".reformatted.coords")
         output:
-                str(SVPS_QRY_PREFIX + ".DUP.coords")
+                str(SVPS_QRY_PREFIX + ".Repeat.coords")
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
@@ -79,6 +92,18 @@ rule find_qry_duplication_locations:
                 config["svMinSize"]
         shell:
                 "bash ./Scripts/find-dups.sh {input} {output} {params}"
+
+rule find_qry_dup_locations_from_repeats:
+        input:
+                str(SVPS_QRY_PREFIX + ".Repeat.coords")
+        output:
+                str(SVPS_QRY_PREFIX + ".DUP.coords")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
+        shell:
+                "python ./Scripts/find-cnvs-graph.py {input} {output}"
+
 
 rule find_ref_inversion_locations:
         input:

@@ -94,8 +94,7 @@ rule all:
                 str(SVPS_QRY_PREFIX + ".DUP.final.noN.coords"),
                 str(SVPS_QRY_PREFIX + ".INV.final.noN.coords"),
                 str(SVPS_QRY_PREFIX + ".TRANS.final.noN.coords"),
-                ##Test Duplication filtering to isolate CNVs
-                
+                                
                 ##Test conversion of files to bed
                 str(SVPS_REF_PREFIX + ".DEL.merged.bed"),
                 str(SVPS_REF_PREFIX + ".INS.merged.bed"),
@@ -128,6 +127,6 @@ rule all:
                 ## Final Outputs
                 str(SVPS_REF_PREFIX + ".ALL.fromMerged.bed"),
                 str(SVPS_QRY_PREFIX + ".ALL.fromMerged.bed"),
-                #str(SVPS_REF_PREFIX + ".ALL.sorted.vcf"),
-                #str(SVPS_QRY_PREFIX + ".ALL.sorted.vcf")
+                str(SVPS_REF_PREFIX + ".ALL.sorted.vcf"),
+                str(SVPS_QRY_PREFIX + ".ALL.sorted.vcf")
 

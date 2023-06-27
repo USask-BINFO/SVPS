@@ -40,6 +40,9 @@ VCF_ARR+=("##INFO=<ID=SVLEN,Number=1,Type=Integer,Description=\"Length of SV as 
 VCF_ARR+=("##INFO=<ID=QRYCHR,Number=1,Type=String,Description=\"Chromosome ID for SV in Query sequence\">")
 VCF_ARR+=("##INFO=<ID=QRYSTART,Number=1,Type=Integer,Description=\"Index position at which the identified SV starts in Query sequence\">")
 VCF_ARR+=("##INFO=<ID=QRYEND,Number=1,Type=Integer,Description=\"Index position at which the identified SV end in Query sequence\">")
+VCF_ARR+=("##INFO=<ID=MATEID,Number=1,Type=String,Description=\"Identifier for the mated pair BND reported that makes up the other end of the Transloc SV\">")
+VCF_ARR+=("##INFO=<ID=TRANSSTART,Number=1,Type=String,Description=\"Index position at which the identified Transloc SV starts in ref sequence\">")
+VCF_ARR+=("##INFO=<ID=TRANSEND,Number=1,Type=String,Description=\"Index position at which the identified Transloc SV ends in ref sequence\">")
 VCF_ARR+=("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">")
 VCF_ARR+=("##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read depth\">")
 
