@@ -15,7 +15,15 @@ do
 done
 
 echo "Combining VCF files for each type to ${OUTPUT_FILE_PREFIX}.sorted.vcf!.."
-echo $VCF_TYPE_FILES
-bcftools concat --allow-overlaps -o ${OUTPUT_FILE_PREFIX}.vcf -O v `echo $VCF_TYPE_FILES`
+echo "Type files: " $VCF_TYPE_FILES
+#bcftools concat --allow-overlap -o ${OUTPUT_FILE_PREFIX}.vcf -O v `echo $VCF_TYPE_FILES`
+
+cat $1 > ${OUTPUT_FILE_PREFIX}.vcf
+shift
+for TYPE_FILE in $*
+do
+	grep -v "^#" $TYPE_FILE >> ${OUTPUT_FILE_PREFIX}.vcf
+done
+
 bcftools sort -o ${OUTPUT_FILE_PREFIX}.sorted.vcf ${OUTPUT_FILE_PREFIX}.vcf
 echo "Job's done!.."

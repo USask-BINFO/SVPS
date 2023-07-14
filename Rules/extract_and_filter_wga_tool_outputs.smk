@@ -128,11 +128,13 @@ rule segment_ref_syri_mummer_headers:
                 str(SYRI_REF_PREFIX +".syri.mummer.final.DUP.bed"),
                 str(SYRI_REF_PREFIX +".syri.mummer.final.INV.bed"),
                 str(SYRI_REF_PREFIX +".syri.mummer.final.TRANS.bed"),
+                str(SYRI_REF_PREFIX +".syri.mummer.final.TRANSPOS.bed"),
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/SyRIFiltering.benchmarking.tsv"), BENCH_REPEAT)
         params:
-                str(SYRI_REF_PREFIX +".syri.mummer.final.")
+                str(SYRI_REF_PREFIX +".syri.mummer.final."),
+                config["maxDistApart"]
         shell:
                 "bash ./Scripts/segment-wga-tool-bed-outputs.sh {input.bedInput} {params}"
 
@@ -146,11 +148,13 @@ rule segment_qry_syri_mummer_headers:
                 str(SYRI_QRY_PREFIX +".syri.mummer.final.DUP.bed"),
                 str(SYRI_QRY_PREFIX +".syri.mummer.final.INV.bed"),
                 str(SYRI_QRY_PREFIX +".syri.mummer.final.TRANS.bed"),
+                str(SYRI_QRY_PREFIX +".syri.mummer.final.TRANSPOS.bed"),
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/SyRIFiltering.benchmarking.tsv"), BENCH_REPEAT)
         params:
-                str(SYRI_QRY_PREFIX +".syri.mummer.final.")
+                str(SYRI_QRY_PREFIX +".syri.mummer.final."),
+                config["maxDistApart"]
         shell:
                 "bash ./Scripts/segment-wga-tool-bed-outputs.sh {input.bedInput} {params}"
 
@@ -164,11 +168,13 @@ rule segment_ref_syri_minimap_headers:
                 str(SYRI_REF_PREFIX +".syri.minimap.final.DUP.bed"),
                 str(SYRI_REF_PREFIX +".syri.minimap.final.INV.bed"),
                 str(SYRI_REF_PREFIX +".syri.minimap.final.TRANS.bed"),
+                str(SYRI_REF_PREFIX +".syri.minimap.final.TRANSPOS.bed"),
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/SyRIFiltering.benchmarking.tsv"), BENCH_REPEAT)
         params:
-                str(SYRI_REF_PREFIX +".syri.minimap.final.")
+                str(SYRI_REF_PREFIX +".syri.minimap.final."),
+                config["maxDistApart"]
         shell:
                 "bash ./Scripts/segment-wga-tool-bed-outputs.sh {input.bedInput} {params}"
 
@@ -182,11 +188,13 @@ rule segment_qry_syri_minimap_headers:
                 str(SYRI_QRY_PREFIX +".syri.minimap.final.DUP.bed"),
                 str(SYRI_QRY_PREFIX +".syri.minimap.final.INV.bed"),
                 str(SYRI_QRY_PREFIX +".syri.minimap.final.TRANS.bed"),
+                str(SYRI_QRY_PREFIX +".syri.minimap.final.TRANSPOS.bed")
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/SyRIFiltering.benchmarking.tsv"), BENCH_REPEAT)
         params:
-                str(SYRI_QRY_PREFIX +".syri.minimap.final.")
+                str(SYRI_QRY_PREFIX +".syri.minimap.final."),
+                config["maxDistApart"]
         shell:
                 "bash ./Scripts/segment-wga-tool-bed-outputs.sh {input.bedInput} {params}"
 

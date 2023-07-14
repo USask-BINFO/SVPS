@@ -20,7 +20,11 @@ sed -i 's/insertion_novel/INS/g' $TEMP_FILE
 sed -i 's/insertion_mobile/INS/g' $TEMP_FILE
 
 #Replace all spaces with tabs for correct formatting for Bedtools
-sed -i 's/ /\t/g' $TEMP_FILE
+tail -n+2 $TEMP_FILE > ${TEMP_FILE}.noHeader
+sort -k1,1 -k2,2n -k3,3n -o $OUTPUT_FILE ${TEMP_FILE}.noHeader
+sed -i 's/ /\t/g' $OUTPUT_FILE #${TEMP_FILE}.noHeader
+#tail -n+1 $TEMP_FILE > ${TEMP_FILE}.noHeader
 
-bedtools merge -d $MAX_DIST -c 1 -o count -i $TEMP_FILE > $OUTPUT_FILE
-rm $TEMP_FILE
+#bedtools merge -d $MAX_DIST -c 1 -o count -i ${TEMP_FILE}.noHeader > $OUTPUT_FILE
+rm $TEMP_FILE ${TEMP_FILE}.noHeader
+

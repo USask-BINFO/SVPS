@@ -60,6 +60,7 @@ def main(argv):
 		for gap in coordFile:
 			#Seperate key coordinate information
 			currentGap=gap.strip().split(' ')
+			print("Verifying: " + gap,end="")
 			currChrom=currentGap[0]
 			start=int(currentGap[2])
 			end=int(currentGap[3])

@@ -54,11 +54,25 @@ rule check_for_Ns_in_ref_INV_predictions:
         shell:
                 "python ./Scripts/check-awk-predictions-for-Ns.py {params} {input} {output}"
 
-rule check_for_Ns_in_ref_TRANS_predictions:
+rule check_for_Ns_in_ref_TRANSLOC_predictions:
         input:
                 str(SVPS_REF_PREFIX + ".TRANS.final.coords")
         output:
                 str(SVPS_REF_PREFIX + ".TRANS.final.noN.coords")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/SVPSCoordFiltering.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                refGenome=REF_FILTERED,
+                qryGenome=QRY_FILTERED
+        shell:
+                "python ./Scripts/check-awk-predictions-for-Ns.py {params} {input} {output}"
+
+rule check_for_Ns_in_ref_TRANSPOS_predictions:
+        input:
+                str(SVPS_REF_PREFIX + ".TRANSPOS.final.coords")
+        output:
+                str(SVPS_REF_PREFIX + ".TRANSPOS.final.noN.coords")
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/SVPSCoordFiltering.benchmarking.tsv"), BENCH_REPEAT)
@@ -124,11 +138,25 @@ rule check_for_Ns_in_qry_INV_predictions:
         shell:
                 "python ./Scripts/check-awk-predictions-for-Ns.py {params} {input} {output}"
 
-rule check_for_Ns_in_qry_TRANS_predictions:
+rule check_for_Ns_in_qry_TRANSLOC_predictions:
         input:
                 str(SVPS_QRY_PREFIX + ".TRANS.final.coords")
         output:
                 str(SVPS_QRY_PREFIX + ".TRANS.final.noN.coords")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/SVPSCoordFiltering.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                refGenome=QRY_FILTERED,
+                qryGenome=REF_FILTERED
+        shell:
+                "python ./Scripts/check-awk-predictions-for-Ns.py {params} {input} {output}"
+
+rule check_for_Ns_in_qry_TRANSPOS_predictions:
+        input:
+                str(SVPS_QRY_PREFIX + ".TRANSPOS.final.coords")
+        output:
+                str(SVPS_QRY_PREFIX + ".TRANSPOS.final.noN.coords")
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/SVPSCoordFiltering.benchmarking.tsv"), BENCH_REPEAT)

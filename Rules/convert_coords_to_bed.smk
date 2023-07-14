@@ -85,7 +85,8 @@ rule convert_ref_DUP_coords_to_bed_and_merge:
         shell:
                 "bash ./Scripts/extract-bed-fields-from-align-coords.sh {input} {params.extractedFields};\n"
                 "sort -k1,1 -k2,2n {params.extractedFields} > {params.sortedFields};\n"
-                "bedtools merge -d {params.distAllowed} -c 1 -o count -i {params.sortedFields} > {output};\n"
+                #"bedtools merge -d {params.distAllowed} -c 1 -o count -i {params.sortedFields} > {output};\n"
+                "uniq {params.sortedFields} > {output};\n"
                 "rm {params.extractedFields} {params.sortedFields}"
 
 rule convert_qry_DUP_coords_to_bed_and_merge:
@@ -142,7 +143,7 @@ rule convert_qry_INV_coords_to_bed_and_merge:
                 "bedtools merge -d {params.distAllowed} -c 1 -o count -i {params.sortedFields} > {output};\n"
                 "rm {params.extractedFields} {params.sortedFields}"
 
-rule convert_ref_TRANS_coords_to_bed_and_merge:
+rule convert_ref_TRANSLOC_coords_to_bed_and_merge:
         input:
                 str(SVPS_REF_PREFIX + ".TRANS.final.noN.coords")
         output:
@@ -160,7 +161,25 @@ rule convert_ref_TRANS_coords_to_bed_and_merge:
                 "bedtools merge -d {params.distAllowed} -c 1 -o count -i {params.sortedFields} > {output};\n"
                 "rm {params.extractedFields} {params.sortedFields}"
 
-rule convert_qry_TRANS_coords_to_bed_and_merge:
+rule convert_ref_TRANSPOS_coords_to_bed_and_merge:
+        input:
+                str(SVPS_REF_PREFIX + ".TRANSPOS.final.noN.coords")
+        output:
+                str(SVPS_REF_PREFIX + ".TRANSPOS.merged.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/BedReformatting.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                extractedFields=str(SVPS_REF_PREFIX + ".TRANSPOS.all.bed"),
+                sortedFields=str(SVPS_REF_PREFIX + ".TRANSPOS.sorted.bed"),
+                distAllowed=config["maxDistApart"]
+        shell:
+                "bash ./Scripts/extract-bed-fields-from-align-coords.sh {input} {params.extractedFields};\n"
+                "sort -k1,1 -k2,2n {params.extractedFields} > {params.sortedFields};\n"
+                "bedtools merge -d {params.distAllowed} -c 1 -o count -i {params.sortedFields} > {output};\n"
+                "rm {params.extractedFields} {params.sortedFields}"
+
+rule convert_qry_TRANSLOC_coords_to_bed_and_merge:
         input:
                 str(SVPS_QRY_PREFIX + ".TRANS.final.noN.coords")
         output:
@@ -171,6 +190,24 @@ rule convert_qry_TRANS_coords_to_bed_and_merge:
         params:
                 extractedFields=str(SVPS_QRY_PREFIX + ".TRANS.all.bed"),
                 sortedFields=str(SVPS_QRY_PREFIX + ".TRANS.sorted.bed"),
+                distAllowed=config["maxDistApart"]
+        shell:
+                "bash ./Scripts/extract-bed-fields-from-align-coords.sh {input} {params.extractedFields};\n"
+                "sort -k1,1 -k2,2n {params.extractedFields} > {params.sortedFields};\n"
+                "bedtools merge -d {params.distAllowed} -c 1 -o count -i {params.sortedFields} > {output};\n"
+                "rm {params.extractedFields} {params.sortedFields}"
+
+rule convert_qry_TRANSPOS_coords_to_bed_and_merge:
+        input:
+                str(SVPS_QRY_PREFIX + ".TRANSPOS.final.noN.coords")
+        output:
+                str(SVPS_QRY_PREFIX + ".TRANSPOS.merged.bed")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/BedReformatting.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                extractedFields=str(SVPS_QRY_PREFIX + ".TRANSPOS.all.bed"),
+                sortedFields=str(SVPS_QRY_PREFIX + ".TRANSPOS.sorted.bed"),
                 distAllowed=config["maxDistApart"]
         shell:
                 "bash ./Scripts/extract-bed-fields-from-align-coords.sh {input} {params.extractedFields};\n"

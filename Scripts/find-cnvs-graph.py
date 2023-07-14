@@ -89,12 +89,12 @@ def extractUniqCoordFromComponents(compDict,nodeDict):
 	#For each component, process each list of nodes
 	for key in compDict.keys():
 		compNodes=compDict[key]
-		uniqSeqsPerComp[key]={"R":[],"Q":[],"Entries":[]}
+		uniqSeqsPerComp[key]={"R":[],"Q":[],"Entries":[],"CNVType":""} #Still need CNV type field?
 		#For each node in list of nodes, check ref and qry sequences and store only those not found yet
 		for node in compNodes:
 			refKey=(node.rChrom,node.rStart,node.rEnd)
 			qryKey=(node.qChrom,node.qStart,node.qEnd)
-			fullEntry=(node.rChrom,node.rOrientation,node.rStart,node.rEnd,node.qChrom,node.qOrientation,node.qStart,node.qEnd,node.svLen,node.svType,node.simScore)
+			fullEntry=[node.rChrom,node.rOrientation,node.rStart,node.rEnd,node.qChrom,node.qOrientation,node.qStart,node.qEnd,node.svLen,node.svType,node.simScore]
 			if(refKey not in uniqSeqsPerComp[key]["R"]):
 				uniqSeqsPerComp[key]["R"].append(refKey)
 				if(fullEntry not in uniqSeqsPerComp[key]["Entries"]):
@@ -110,8 +110,16 @@ def extractUniqCoordFromComponents(compDict,nodeDict):
 def findCompsWithImbalanceInUniqs(compSeqs):
 	cnvComps={}
 	for key in compSeqs.keys():
-		if len(compSeqs[key]["R"]) != len(compSeqs[key]["Q"]):
+		#if len(compSeqs[key]["R"]) != len(compSeqs[key]["Q"]):
+		if len(compSeqs[key]["R"]) < len(compSeqs[key]["Q"]): #Dup relates to variation where query has more copies of the region
 			cnvComps[key]=compSeqs[key]
+			#if(len(compSeqs[key]["R"]) > len(compSeqs[key]["Q"])):
+			#	cnvComps[key]["CNVType"]="CNG"
+			#else:
+			#	cnvComps[key]["CNVType"]="CNL"
+			#for entry in cnvComps[key]["Entries"]:
+			#	entry[9]=str(entry[9]+":"+cnvComps[key]["CNVType"])
+
 	return cnvComps
 
 
@@ -134,10 +142,18 @@ def removeClosestEntryFromEachCNV(cnvRegions):
 			refStart=entry[2]
 			qryStart=entry[6]
 			sepDistList.append(abs(refStart-qryStart))
+		##for round in range( min( len(cnvRegions[key]["R"]),len(cnvRegions[key]["Q"]) ) ):
+		#minIndex=sepDistList.index(min(sepDistList))
+		#currEntriesList.pop(minIndex)
+		#sepDistList.pop(minIndex)
+		#cnvEntriesOnly=cnvEntriesOnly+currEntriesList
 
-		minIndex=sepDistList.index(min(sepDistList))
-		currEntriesList.pop(minIndex)
-		cnvEntriesOnly=cnvEntriesOnly+currEntriesList
+		for round in range( min( len(cnvRegions[key]["R"]),len(cnvRegions[key]["Q"]) ) ):
+			minIndex=sepDistList.index(min(sepDistList))
+			currRefEntries=[]
+			currRefEntries.append(currEntriesList.pop(minIndex))
+			sepDistList.pop(minIndex)
+			cnvEntriesOnly=cnvEntriesOnly+currRefEntries
 
 	return cnvEntriesOnly
 
@@ -164,18 +180,26 @@ def main(argv):
 	#	print(compID, "Qry:", compSeqs[compID]["Q"])
 	#	print(compID, "Entries:", compSeqs[compID]["Entries"])
 
-	#for compID in cnvCandidates.keys():
-	#	print(compID, ":", len(cnvRegions[compID]["R"]), len(cnvRegions[compID]["Q"]) )
+	sumR=0
+	sumQ=0
+	for compID in cnvCandidates.keys():
+		sumR=sumR+len(cnvCandidates[compID]["R"])
+		sumQ=sumQ+len(cnvCandidates[compID]["Q"])
+		print(compID, ":", len(cnvCandidates[compID]["R"]), len(cnvCandidates[compID]["Q"]), len(cnvCandidates[compID]["Entries"]) )
 	#	#print(compID, "Ref:", cnvRegions[compID]["R"])
 	#	#print(compID, "Qry:", cnvRegions[compID]["Q"])
-	#	print(compID, "Entries:", cnvRegions[compID]["Entries"])
+		print(compID, "Entries:", cnvCandidates[compID]["Entries"])
 	#	for entry in cnvRegions[compID]["Entries"]:
 	#		sepDist=abs(entry[2] - entry[6])
 	#		svLen=entry[8]
 	#		print(compID, ":", sepDist, svLen)
 
+	print("SumR:",sumR)
+	print("SumQ:",sumQ)
+	print("Total:",len(cnvCandidates.keys()))
 	outputFileHandle=open(argv[1],"w")
 	for entry in cnvEntries:
+		#print(entry)
 		#outputFileHandle.write(entry[0]+" "+entry[1]+" "+entry[2]+" "+entry[3]+" "+entry[4]+" "+entry[5]+" "+entry[6]+" "+entry[7]+" "+entry[8]+" DUP "+entry[9])
 		outputFileHandle.write(" ".join(str(field) for field in entry)+"\n")
 	print("Jobs done!..")

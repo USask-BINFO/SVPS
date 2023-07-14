@@ -97,6 +97,20 @@ rule run_mumco_w_ref:
         shell:
                "bash ./Scripts/run-mumco.sh {params.mumCoScript} {threads} {input.refGenome} {input.qryGenome} {params.genomeDetails} {params.outDir} {params.sampName} {params.outPrefix}"
 
+
+rule filter_mumco_vcf_ref:
+        input:
+                refVCF=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME +".mumco_output/" + REF_SAMP_NAME +".mumco.SVs_all.vcf")
+        output:
+                str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME +"_output/" + REF_SAMP_NAME +".SVs_filtered.vcf")
+        threads: config["threads"]
+        benchmark:
+                repeat(str(BENCH_DIR + "/MUMCO.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
+        conda:
+                config["condaEnvYAML"]
+        shell:
+                "bcftools filter -e \'SVTYPE=\"CONTR\"\' -o {output} {input};\n"
+
 rule run_mumco_w_qry:
         input:
                 refGenome=REF_FILTERED,
@@ -116,3 +130,6 @@ rule run_mumco_w_qry:
                 sampName=QRY_SAMP_NAME
         shell:
                "bash ./Scripts/run-mumco.sh {params.mumCoScript} {threads} {input.qryGenome} {input.refGenome} {params.genomeDetails} {params.outDir} {params.sampName} {params.outPrefix}"
+
+
+

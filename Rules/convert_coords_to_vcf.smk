@@ -142,11 +142,11 @@ rule convert_qry_INV_coords_to_vcf:
                 "bash ./Scripts/prepend-vcf-header.sh {output} {params.contigInfo} {params.mummerL} {params.mummerC} {params.mummerB};\n"
                 "bash ./Scripts/convert-INV-bed-to-vcf.sh {input} {output} {params.refGenome}"
 
-rule convert_ref_TRANS_coords_to_BND_vcf:
+rule convert_ref_TRANSLOC_coords_to_vcf:
         input:
                 str(SVPS_REF_PREFIX + ".TRANS.merged.bed")
         output:
-                str(SVPS_REF_PREFIX + ".BND.vcf")
+                str(SVPS_REF_PREFIX + ".TRANSLOC.vcf")
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/VCFReformatting.benchmarking.tsv"), BENCH_REPEAT)
@@ -154,16 +154,35 @@ rule convert_ref_TRANS_coords_to_BND_vcf:
                 contigInfo=str(config["genomesFolder"] + "/RefSeqDetails.txt"),
                 mummerL=config["minMatchLen"],
                 mummerC=config["minClusterSize"],
-                mummerB=config["maxEntend"]
+                mummerB=config["maxEntend"],
+                svType="DEL:TRANSLOC"
         shell:
                 "bash ./Scripts/prepend-vcf-header.sh {output} {params.contigInfo} {params.mummerL} {params.mummerC} {params.mummerB};\n"
-                "bash ./Scripts/convert-TRANS-bed-to-vcf.sh {input} {output}"
+                "bash ./Scripts/convert-TRANS-bed-to-vcf.sh {input} {output} {params.svType}"
 
-rule convert_qry_TRANS_coords_to_BND_vcf:
+rule convert_ref_TRANSPOS_coords_to_vcf:
+        input:
+                str(SVPS_REF_PREFIX + ".TRANSPOS.merged.bed")
+        output:
+                str(SVPS_REF_PREFIX + ".TRANSPOS.vcf")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/VCFReformatting.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                contigInfo=str(config["genomesFolder"] + "/RefSeqDetails.txt"),
+                mummerL=config["minMatchLen"],
+                mummerC=config["minClusterSize"],
+                mummerB=config["maxEntend"],
+                svType="DEL:TRANSPOS"
+        shell:
+                "bash ./Scripts/prepend-vcf-header.sh {output} {params.contigInfo} {params.mummerL} {params.mummerC} {params.mummerB};\n"
+                "bash ./Scripts/convert-TRANS-bed-to-vcf.sh {input} {output} {params.svType}"
+
+rule convert_qry_TRANSLOC_coords_to_vcf:
         input:
                 str(SVPS_QRY_PREFIX + ".TRANS.merged.bed")
         output:
-                str(SVPS_QRY_PREFIX + ".BND.vcf")
+                str(SVPS_QRY_PREFIX + ".TRANSLOC.vcf")
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/VCFReformatting.benchmarking.tsv"), BENCH_REPEAT)
@@ -171,10 +190,30 @@ rule convert_qry_TRANS_coords_to_BND_vcf:
                 contigInfo=str(config["genomesFolder"] + "/QrySeqDetails.txt"),
                 mummerL=config["minMatchLen"],
                 mummerC=config["minClusterSize"],
-                mummerB=config["maxEntend"]
+                mummerB=config["maxEntend"],
+                svType="DEL:TRANSLOC"
         shell:
                 "bash ./Scripts/prepend-vcf-header.sh {output} {params.contigInfo} {params.mummerL} {params.mummerC} {params.mummerB};\n"
-                "bash ./Scripts/convert-TRANS-bed-to-vcf.sh {input} {output}"
+                "bash ./Scripts/convert-TRANS-bed-to-vcf.sh {input} {output} {params.svType}"
+
+rule convert_qry_TRANSPOS_coords_to_vcf:
+        input:
+                str(SVPS_QRY_PREFIX + ".TRANSPOS.merged.bed")
+        output:
+                str(SVPS_QRY_PREFIX + ".TRANSPOS.vcf")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/VCFReformatting.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                contigInfo=str(config["genomesFolder"] + "/QrySeqDetails.txt"),
+                mummerL=config["minMatchLen"],
+                mummerC=config["minClusterSize"],
+                mummerB=config["maxEntend"],
+                svType="DEL:TRANSPOS"
+        shell:
+                "bash ./Scripts/prepend-vcf-header.sh {output} {params.contigInfo} {params.mummerL} {params.mummerC} {params.mummerB};\n"
+                "bash ./Scripts/convert-TRANS-bed-to-vcf.sh {input} {output} {params.svType}"
+
 
 rule merge_ref_vcfs_to_all_types_file:
        input:
@@ -182,7 +221,8 @@ rule merge_ref_vcfs_to_all_types_file:
                str(SVPS_REF_PREFIX + ".INS.vcf"),
                str(SVPS_REF_PREFIX + ".DUP.vcf"),
                str(SVPS_REF_PREFIX + ".INV.vcf"),
-               str(SVPS_REF_PREFIX + ".BND.vcf")
+               str(SVPS_REF_PREFIX + ".TRANSLOC.vcf"),
+               str(SVPS_REF_PREFIX + ".TRANSPOS.vcf")
        output:
                str(SVPS_REF_PREFIX + ".ALL.sorted.vcf")
        threads: 1
@@ -199,7 +239,8 @@ rule merge_qry_vcfs_to_all_types_file:
                str(SVPS_QRY_PREFIX + ".INS.vcf"),
                str(SVPS_QRY_PREFIX + ".DUP.vcf"),
                str(SVPS_QRY_PREFIX + ".INV.vcf"),
-               str(SVPS_QRY_PREFIX + ".BND.vcf")
+               str(SVPS_QRY_PREFIX + ".TRANSLOC.vcf"),
+               str(SVPS_QRY_PREFIX + ".TRANSPOS.vcf")
        output:
                str(SVPS_QRY_PREFIX + ".ALL.sorted.vcf")
        threads: 1
