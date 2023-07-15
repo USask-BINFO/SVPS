@@ -78,6 +78,11 @@ maxSizeForSVs: 300000 # Filtering maximum size for SV detectable by tools
 verificationSampSize: 1000 # Total number of coord entries for each SV type to verify
 indexInterval: 100000 #Index interval when indexing samtools depth output
 
+#Params for determining if SVs occur at same location (based on same neighbouring/flanking genetic contents)
+neighbourSize: 10000 #Consider 20x avg/median gene size
+invNeighbourSimilarity: 90 # Integer value of required similarity rate (%) for bash comparison (seeking same neighbours between samples)
+transposNeighbourSimilarity: 50 # Integer value of maximum similarity rate (%) for bash comparison (seeking different neighbours to identify movement)
+
 #BEDTools Configurations
 maxDistApart: 0 # Amount of separation allowed between entries that should still be merged (0 means they must be either overlapping or side-by-side) (EX:0)
 overlapThreshold: 0.5 # (0.5 [or 50%] is a commonly use setting in several publications. Alternatively, svim-asm paper used 70%)
