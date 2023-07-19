@@ -17,14 +17,17 @@ REF_ABS_PATH=`echo "$(cd "$(dirname "$REF_GENOME")"; pwd)/$(basename "$REF_GENOM
 QRY_ABS_PATH=`echo "$(cd "$(dirname "$QRY_GENOME")"; pwd)/$(basename "$QRY_GENOME")"`
 
 echo "Changing directory to $OUTPUT_DIR!.."
-mkdir -p $OUTPUT_DIR
-cd $OUTPUT_DIR
+#mkdir -p $OUTPUT_DIR
+#cd $OUTPUT_DIR
 
 echo "Starting MUM&CO!.."
+pwd
 bash $MUMCO_SCRIPT_PATH -t $THREADS -r $REF_ABS_PATH -q $QRY_ABS_PATH -g $GENOME_SIZE -o $OUTPUT_PREFIX #-b
 
 #mv ${OUTPUT_PREFIX}_output ${SAMPLE_NAME}_output #Rename to match Snakefile without causing Dir exists error
-cp ${OUTPUT_PREFIX}_output/${OUTPUT_PREFIX}.SVs_all.tsv ${SAMPLE_NAME}_output/${SAMPLE_NAME}.SVs_all.tsv
+#cp ${OUTPUT_PREFIX}_output/${OUTPUT_PREFIX}.SVs_all.tsv ${SAMPLE_NAME}_output/${SAMPLE_NAME}.SVs_all.tsv
+
+mv ${OUTPUT_PREFIX}_* ${OUTPUT_DIR}
 
 echo "MUM&CO Complete, returning to pipeline's working directory!.."
-cd $WORKING_DIR
+#cd $WORKING_DIR

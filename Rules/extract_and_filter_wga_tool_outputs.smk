@@ -200,35 +200,39 @@ rule segment_qry_syri_minimap_headers:
 
 rule filter_mumco_w_ref:
         input:
-                str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME +"_output/" + REF_SAMP_NAME +".SVs_all.tsv")
+                #str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME +"_output/" + REF_SAMP_NAME +".SVs_all.tsv")
+                str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + ".mumco_output/" + REF_SAMP_NAME +".mumco.SVs_all.tsv"),
         output:
-                str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME +"_output/" + REF_SAMP_NAME + ".SVs_ALL.bed")
+                #str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME +"_output/" + REF_SAMP_NAME + ".SVs_ALL.bed")
+                str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME +".mumco_output/" + REF_SAMP_NAME + ".mumco.SVs_ALL.bed")
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/MUMCOFiltering.benchmarking.tsv"), BENCH_REPEAT)
         params:
-                tempFile=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".temp.bed"),
+                tempFile=str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + ".mumco_output/" + REF_SAMP_NAME + ".temp.bed"),
                 maxDist=config["maxDistApart"]
         shell:
                 "bash ./Scripts/filter-mumco-columns.sh {input} {params.tempFile} {output} {params.maxDist}"
 
 rule filter_mumco_w_qry:
         input:
-                str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + "_output/" + QRY_SAMP_NAME + ".SVs_all.tsv")
+                #str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + "_output/" + QRY_SAMP_NAME + ".SVs_all.tsv"),
+                str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + ".mumco_output/" + QRY_SAMP_NAME +".mumco.SVs_all.tsv"),
         output:
-                str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + "_output/" + QRY_SAMP_NAME + ".SVs_ALL.bed")
+                str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + "_output/" + QRY_SAMP_NAME + ".mumco.SVs_ALL.bed")
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/MUMCOFiltering.benchmarking.tsv"), BENCH_REPEAT)
         params:
-                tempFile=str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + "_output/" + QRY_SAMP_NAME + ".temp.bed"),
+                tempFile=str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + ".mumco_output/" + QRY_SAMP_NAME + ".temp.bed"),
                 maxDist=config["maxDistApart"]
         shell:
                 "bash ./Scripts/filter-mumco-columns.sh {input} {params.tempFile} {output} {params.maxDist}"
 
 rule segment_ref_mumco_headers:
         input:
-                str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME +"_output/" + REF_SAMP_NAME + ".SVs_ALL.bed")
+                #str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME +"_output/" + REF_SAMP_NAME + ".SVs_ALL.bed"),
+                str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME +".mumco_output/" + REF_SAMP_NAME + ".mumco.SVs_ALL.bed")
         output:
                 str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_DEL.bed"),
                 str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME + ".SVs_INS.bed"),
@@ -245,7 +249,8 @@ rule segment_ref_mumco_headers:
 
 rule segment_qry_mumco_headers:
         input:
-                str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + "_output/" + QRY_SAMP_NAME + ".SVs_ALL.bed")
+                #str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + "_output/" + QRY_SAMP_NAME + ".SVs_ALL.bed"),
+                str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + ".mumco_output/" + QRY_SAMP_NAME +".mumco.SVs_all.tsv"),
         output:
                 str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + "_output/" + QRY_SAMP_NAME +".SVs_DEL.bed"),
                 str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + "_output/" + QRY_SAMP_NAME +".SVs_INS.bed"),

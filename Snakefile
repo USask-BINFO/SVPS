@@ -169,8 +169,12 @@ rule all:
                 #str(SYRI_QRY_PREFIX +".syri.minimap.final.DUP.bed"),
                 #str(SYRI_QRY_PREFIX +".syri.minimap.final.INV.bed"),
                 #str(SYRI_QRY_PREFIX +".syri.minimap.final.TRANS.bed"),
-                str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME +".SVs_ALL.bed"),
-                str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME +".SVs_filtered.vcf"),
+
+                str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + ".mumco_output/" + REF_SAMP_NAME +".mumco.SVs_ALL.bed"),
+                str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + ".mumco_output/" + REF_SAMP_NAME +".mumco.SVs_filtered.vcf"),
+                #str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + "_output/" + QRY_SAMP_NAME +".SVs_ALL.bed"),
+                #str(SV_RESULTS_DIR + "/MUMCO/QRY/" + QRY_SAMP_NAME + "_output/" + QRY_SAMP_NAME +".SVs_filtered.vcf"),
+
                 #str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME +".SVs_DEL.bed"),
                 #str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME +".SVs_INS.bed"),
                 #str(SV_RESULTS_DIR + "/MUMCO/REF/" + REF_SAMP_NAME + "_output/" + REF_SAMP_NAME +".SVs_DUP.bed"),
