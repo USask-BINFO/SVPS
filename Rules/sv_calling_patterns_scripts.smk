@@ -127,7 +127,7 @@ rule find_ref_inversion_locations:
                 repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
         params:
                 neighbourSize=config["neighbourSize"],
-                simThresh=config["invNeighbourSimilarity"],
+                #simThresh=config["invNeighbourSimilarity"],
                 refGenome=REF_FILTERED,
                 qryGenome=QRY_FILTERED
         shell:
@@ -156,7 +156,7 @@ rule find_qry_inversion_locations:
                 repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
         params:
                 neighbourSize=config["neighbourSize"],
-                simThresh=config["invNeighbourSimilarity"],
+                #simThresh=config["invNeighbourSimilarity"],
                 refGenome=QRY_FILTERED,
                 qryGenome=REF_FILTERED                
         shell:
@@ -173,10 +173,23 @@ rule find_ref_non_overlapping_locations:
         shell:
                 "bash ./Scripts/find-single-align-regions.sh {input} {output}"
 
+rule filter_ref_non_overlapping_locations:
+        input:
+                str(SVPS_REF_PREFIX + ".noOverlap.coords")
+        output:
+                str(SVPS_REF_PREFIX + ".noOverlap.filtered.coords")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                config["verifyThresholdMax"]
+        shell:
+                "bash ./Scripts/filter-single-align-regions.sh {input} {output} {params}"
+
 rule find_ref_transloc_locations:
         input:
                 #str(MUMMER_REF_PREFIX + ".reformatted.coords")
-                str(SVPS_REF_PREFIX + ".noOverlap.coords")
+                str(SVPS_REF_PREFIX + ".noOverlap.filtered.coords")
         output:
                 str(SVPS_REF_PREFIX + ".TRANS.final.coords")
         threads: 1
@@ -187,7 +200,7 @@ rule find_ref_transloc_locations:
 
 rule find_ref_transpos_locations:
         input:
-                str(SVPS_REF_PREFIX + ".noOverlap.coords")
+                str(SVPS_REF_PREFIX + ".noOverlap.filtered.coords")
         output:
                 str(SVPS_REF_PREFIX + ".TRANSPOS.final.coords")
         threads: 1
@@ -195,7 +208,7 @@ rule find_ref_transpos_locations:
                 repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
         params:
                 neighbourSize=config["neighbourSize"],
-                simThresh=config["transposNeighbourSimilarity"],
+                #simThresh=config["transposNeighbourSimilarity"],
                 refGenome=REF_FILTERED,
                 qryGenome=QRY_FILTERED
         shell:
@@ -212,10 +225,23 @@ rule find_qry_non_overlapping_locations:
         shell:
                 "bash ./Scripts/find-single-align-regions.sh {input} {output}"
 
+rule filter_qry_non_overlapping_locations:
+        input:
+                str(SVPS_QRY_PREFIX + ".noOverlap.coords") 
+        output:
+                str(SVPS_QRY_PREFIX + ".noOverlap.filtered.coords")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                config["verifyThresholdMax"]
+        shell:
+                "bash ./Scripts/filter-single-align-regions.sh {input} {output} {params}"
+
 rule find_qry_transloc_locations:
         input:
                 #str(MUMMER_QRY_PREFIX + ".reformatted.coords")
-                str(SVPS_QRY_PREFIX + ".noOverlap.coords")
+                str(SVPS_QRY_PREFIX + ".noOverlap.filtered.coords")
         output:
                 str(SVPS_QRY_PREFIX + ".TRANS.final.coords")
         threads: 1
@@ -226,7 +252,7 @@ rule find_qry_transloc_locations:
 
 rule find_qry_transpos_locations:
         input:
-                str(SVPS_QRY_PREFIX + ".noOverlap.coords")
+                str(SVPS_QRY_PREFIX + ".noOverlap.filtered.coords")
         output:
                 str(SVPS_QRY_PREFIX + ".TRANSPOS.final.coords")
         threads: 1
@@ -234,7 +260,7 @@ rule find_qry_transpos_locations:
                 repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
         params:
                 neighbourSize=config["neighbourSize"],
-                simThresh=config["transposNeighbourSimilarity"],
+                #simThresh=config["transposNeighbourSimilarity"],
                 refGenome=QRY_FILTERED,
                 qryGenome=REF_FILTERED
         shell:

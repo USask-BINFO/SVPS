@@ -113,7 +113,7 @@ done
 
 #Print the arrays to file
 printf "%s\n" "${DUPS_ARR[@]}" > $OUTPUT_FILE
-TEMP_FILE="./Temp.coord"
+TEMP_FILE="./${OUTPUT_FILE}.Temp.coord"
 sort -k1,1 -k3,3n -k4,4n -k5,5 -k7,7n -k8,8n $OUTPUT_FILE > $TEMP_FILE
 uniq $TEMP_FILE > $OUTPUT_FILE
 rm $TEMP_FILE

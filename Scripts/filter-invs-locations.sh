@@ -5,9 +5,9 @@ OUTPUT_FILE=$2
 #REF_CHROM_INDEX=$3
 #QRY_CHROM_INDEX=$4
 NEIGHBOUR_SIZE=$3
-SIMILARITY_THRESH=$4
-REF_GENOME=$5
-QRY_GENOME=$6
+#SIMILARITY_THRESH=$4
+REF_GENOME=$4 #$5
+QRY_GENOME=$5 #$6
 
 echo "Filtering INV locations to those occurring at same location in both genomes..."
 REF_TEMP="./refINVTemp.fasta"
@@ -143,16 +143,48 @@ for((EACH_INDEX=0;EACH_INDEX<INV_ARR_LEN;EACH_INDEX++)) do
 
 	#echo "SIMs: $UPSTREAM_SIM $DOWNSTREAM_SIM"
 
-       if [ $((UPSTREAM_SIM)) -ge $((SIMILARITY_THRESH)) ] && [ $((DOWNSTREAM_SIM)) -ge $((SIMILARITY_THRESH)) ]
-       then
-		CURR_RESULT=$(echo "${INV_ARRAY[$EACH_INDEX]}" | tr -d '\n')
-		echo "INV FOUND: $CURR_RESULT"
-                RESULTS_ARR+=("${INV_ARRAY[$EACH_INDEX]}")
-       fi
-
+       #if [ $((UPSTREAM_SIM)) -ge $((SIMILARITY_THRESH)) ] && [ $((DOWNSTREAM_SIM)) -ge $((SIMILARITY_THRESH)) ]
+       #then
+       #	CURR_RESULT=$(echo "${INV_ARRAY[$EACH_INDEX]}" | tr -d '\n')
+       #	echo "INV FOUND: $CURR_RESULT"
+       #        RESULTS_ARR+=("${INV_ARRAY[$EACH_INDEX]}")
+       #fi
+       CURR_RESULT=$(echo -e "${INV_ARRAY[$EACH_INDEX]}\t${DOWNSTREAM_SIM}\t${UPSTREAM_SIM}" | tr -d '\n')
+       RESULTS_ARR+=("$CURR_RESULT")
     fi
 
 done
 
-printf "%s" "${RESULTS_ARR[@]}" > $OUTPUT_FILE
+#Write alignment results to a temp file
+echo "INV neighbours align complete, filtering!.."
+TEMP_FILE=${INV_ALIGNS}.NeighbourAligns
+printf "%s\n" "${RESULTS_ARR[@]}" > $TEMP_FILE
+
+
+#Calculate the thresholds for filtering based on mean and stdev
+MEAN_ALIGN=$(awk '{ sum += ($13 + $14) } END { if (NR > 0) printf "%0.0f", sum / (2*NR) }' $TEMP_FILE)
+
+STDEV_DOWN=$(awk -v MEANVAL="$MEAN_ALIGN" '{a[NR]=$13} END {for(i in a)y+=(a[i]-MEANVAL)^2;printf "%0.1f", sqrt(y/(NR-1))}' $TEMP_FILE)
+STDEV_UP=$(awk -v MEANVAL="$MEAN_ALIGN" '{a[NR]=$14} END {for(i in a)y+=(a[i]-MEANVAL)^2;printf "%0.1f", sqrt(y/(NR-1))}' $TEMP_FILE)
+STDEV_TOTAL=$(awk -v STDEVDOWN="$STDEV_DOWN" -v STDEVUP="$STDEV_UP" 'BEGIN { printf "%.1f", STDEVDOWN<=STDEVUP ? STDEVDOWN: STDEVUP}' </dev/null)
+
+#Setting threshold for INVS filtering to be +1.645 stdev from the mean, assuming normal distribution (implies an alpha of 0.05)(Other options 1.282 for alpha=0.1,1.645 for 0.05, 1.965 for 0.025, and 2.326 for 0.01)
+FILTER_THRESHOLD=$(awk -v MEANRATE="$MEAN_ALIGN" -v STDEVRATE="$STDEV_TOTAL" 'BEGIN { printf "%.0f", MEANRATE+(1.645*STDEVRATE) }' </dev/null)
+
+echo "INV Threshold calculation results.."
+echo "Mean: $MEAN_ALIGN"
+echo "STDEV-Down: $STDEV_DOWN"
+echo "STDEV-UP: $STDEV_UP"
+echo "STDEV-Total: $STDEV_TOTAL"
+echo "Threshold: $FILTER_THRESHOLD"
+
+
+#Filter columns to only those where both up and downstream meet the threshold (below)
+echo "Writing Filtered INVs to $OUTPUT_FILE..."
+awk -v THRESH="$FILTER_THRESHOLD" '{if ($13>=THRESH && $14>=THRESH)
+        print $0;
+}' $TEMP_FILE > $OUTPUT_FILE
+
+#printf "%s" "${RESULTS_ARR[@]}" > $OUTPUT_FILE
+
 #rm $REF_TEMP.upstream $REF_TEMP.downstream $NEEDLE_TEMP.upstream $NEEDLE_TEMP.downstream

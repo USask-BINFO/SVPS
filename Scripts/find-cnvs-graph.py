@@ -30,6 +30,7 @@ def parseAlignmentsToGraphNodes(coordFile):
                 #Process each sorted alignment coordinate line to identify those that refer to same repeated subsequence
                 for entry in coordsList:
                         currentFields = entry.split(' ')
+                        #print(currentFields)
                         refChrom=currentFields[0]
                         refDir=currentFields[1]
                         refStart=int(currentFields[2])
