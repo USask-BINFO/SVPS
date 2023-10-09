@@ -3,9 +3,9 @@
 ALIGN_COORDS=$1
 OUTPUT_FILE=$2
 NEIGHBOUR_SIZE=$3
-#SIMILARITY_THRESH=$4
-REF_GENOME=$4 #$5
-QRY_GENOME=$5 #$6
+SIMILARITY_THRESH=$4
+REF_GENOME=$5 #$5
+QRY_GENOME=$6 #$6
 
 echo "Filtering TRANSPOS locations to those occurring at same location in both genomes..."
 REF_TEMP="./refTRANSPOSTemp.fasta"
@@ -37,8 +37,10 @@ for((EACH_INDEX=0;EACH_INDEX<TRANSPOS_ARR_LEN;EACH_INDEX++)) do
     QRY_LEN=${CURR_ROW_ARRAY[9]}
 
 #    #Verify both entries on same chrom before considering how far apart they are, transpos would be on same chrom
+    #echo "Looping:" $REF_CHR $QRY_CHR
     if [ $REF_CHR = $QRY_CHR ]
     then
+	#echo "If triggerred"
 #    	#Extract ref chrom length by scanning index file entries
 #    	CURR_REF_CHR_LEN=0
 #    	for((CHR_COUNTER=0;CHR_COUNTER<REF_CHR_COUNT;CHR_COUNTER++)) do
@@ -130,10 +132,12 @@ for((EACH_INDEX=0;EACH_INDEX<TRANSPOS_ARR_LEN;EACH_INDEX++)) do
 
 
 	#Extract similarity scores from both temp files using grep and regex to compare with required similarity threshold
-	UPSTREAM_SIM=$(head -n50 <(printf "%s" "$UPSTREAM_ALIGN") | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
+	#UPSTREAM_SIM=$(head -n50 <(printf "%s" "$UPSTREAM_ALIGN") | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
+	UPSTREAM_SIM=$(head -n50 <(printf "%s" "$UPSTREAM_ALIGN") | grep "^# Identity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
 	UPSTREAM_SIM=$(awk -v SIMSCORE="$UPSTREAM_SIM" 'BEGIN { printf "%.0f", SIMSCORE }' </dev/null)
 
-	DOWNSTREAM_SIM=$(head -n50 <(printf "%s" "$DOWNSTREAM_ALIGN") | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
+	#DOWNSTREAM_SIM=$(head -n50 <(printf "%s" "$DOWNSTREAM_ALIGN") | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
+	DOWNSTREAM_SIM=$(head -n50 <(printf "%s" "$DOWNSTREAM_ALIGN") | grep "^# Identity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
 	DOWNSTREAM_SIM=$(awk -v SIMSCORE="$DOWNSTREAM_SIM" 'BEGIN { printf "%.0f", SIMSCORE }' </dev/null) 
 
 	#echo "SIMs: $UPSTREAM_SIM $DOWNSTREAM_SIM"
@@ -150,34 +154,35 @@ for((EACH_INDEX=0;EACH_INDEX<TRANSPOS_ARR_LEN;EACH_INDEX++)) do
 done
 
 #Write alignment results to a temp file
-echo "TRANSPOS neighbours align complete, filtering!.."
+echo "TRANSPOS neighbours align complete!.."
 TEMP_FILE=${ALIGN_COORDS}.NeighbourAligns
 printf "%s\n" "${RESULTS_ARR[@]}" > $TEMP_FILE
 
-#Calculate the thresholds for filtering based on mean and stdev
-MEAN_ALIGN=$(awk '{ sum += ($13 + $14) } END { if (NR > 0) printf "%0.0f", sum / (2*NR) }' $TEMP_FILE)
+##Calculate the thresholds for filtering based on mean and stdev
+#MEAN_ALIGN=$(awk '{ sum += ($13 + $14) } END { if (NR > 0) printf "%0.0f", sum / (2*NR) }' $TEMP_FILE)
 
-STDEV_DOWN=$(awk -v MEANVAL="$MEAN_ALIGN" '{a[NR]=$13} END {for(i in a)y+=(a[i]-MEANVAL)^2;printf "%0.1f", sqrt(y/(NR-1))}' $TEMP_FILE)
-STDEV_UP=$(awk -v MEANVAL="$MEAN_ALIGN" '{a[NR]=$14} END {for(i in a)y+=(a[i]-MEANVAL)^2;printf "%0.1f", sqrt(y/(NR-1))}' $TEMP_FILE)
-STDEV_TOTAL=$(awk -v STDEVDOWN="$STDEV_DOWN" -v STDEVUP="$STDEV_UP" 'BEGIN { printf "%.1f", STDEVDOWN<=STDEVUP ? STDEVDOWN: STDEVUP}' </dev/null)
+#STDEV_DOWN=$(awk -v MEANVAL="$MEAN_ALIGN" '{a[NR]=$13} END {for(i in a)y+=(a[i]-MEANVAL)^2;printf "%0.1f", sqrt(y/(NR-1))}' $TEMP_FILE)
+#STDEV_UP=$(awk -v MEANVAL="$MEAN_ALIGN" '{a[NR]=$14} END {for(i in a)y+=(a[i]-MEANVAL)^2;printf "%0.1f", sqrt(y/(NR-1))}' $TEMP_FILE)
+#STDEV_TOTAL=$(awk -v STDEVDOWN="$STDEV_DOWN" -v STDEVUP="$STDEV_UP" 'BEGIN { printf "%.1f", STDEVDOWN<=STDEVUP ? STDEVDOWN: STDEVUP}' </dev/null)
 
-#Setting threshold for TRANSPOS filtering to be -1.282 stdev from the mean, assuming normal distribution (implies an alpha of 0.1)(OTher options 1.645 for alpha=0.05, 1.965 for 0.025, and 2.326 for 0.01)
-FILTER_THRESHOLD=$(awk -v MEANRATE="$MEAN_ALIGN" -v STDEVRATE="$STDEV_TOTAL" 'BEGIN { printf "%.0f", MEANRATE-(0.3333*STDEVRATE) }' </dev/null)
+##Setting threshold for TRANSPOS filtering to be -1.282 stdev from the mean, assuming normal distribution (implies an alpha of 0.1)(OTher options 1.645 for alpha=0.05, 1.965 for 0.025, and 2.326 for 0.01), alt: use 0.3333
+##FILTER_THRESHOLD=$(awk -v MEANRATE="$MEAN_ALIGN" -v STDEVRATE="$STDEV_TOTAL" 'BEGIN { printf "%.0f", (MEANRATE+STDEVRATE) }' </dev/null)
+#FILTER_THRESHOLD=$SIMILARITY_THRESH #Provided in Config file based on the result of random alignments experiment result
 
-echo "TRANSPOS Threshold calculation results.."
-echo "Mean: $MEAN_ALIGN"
-echo "STDEV-Down: $STDEV_DOWN"
-echo "STDEV-UP: $STDEV_UP"
-echo "STDEV-Total: $STDEV_TOTAL"
-echo "Threshold: $FILTER_THRESHOLD"
+#echo "TRANSPOS Threshold calculation results.."
+#echo "Mean: $MEAN_ALIGN"
+#echo "STDEV-Down: $STDEV_DOWN"
+#echo "STDEV-UP: $STDEV_UP"
+#echo "STDEV-Total: $STDEV_TOTAL"
+#echo "Threshold: $FILTER_THRESHOLD"
 
-#Filter columns to only those where both up and downstream meet the threshold (below)
-echo "Writing Filtered Transpositions to $OUTPUT_FILE..."
-awk -v THRESH="$FILTER_THRESHOLD" '{if ($13<=THRESH && $14<=THRESH)
-        print $0;
-}' $TEMP_FILE > $OUTPUT_FILE
+##Filter columns to only those where both up and downstream meet the threshold (below)
+#echo "Writing Filtered Transpositions to $OUTPUT_FILE..."
+#awk -v THRESH="$FILTER_THRESHOLD" '{if ($13<=THRESH && $14<=THRESH)
+#        print $0;
+#}' $TEMP_FILE > $OUTPUT_FILE
 
 
-echo "Filtering Transpositions complete!.."
+#echo "Filtering Transpositions complete!.."
 echo "Jobs done!.."
 #rm $REF_TEMP.upstream $REF_TEMP.downstream $NEEDLE_TEMP.upstream $NEEDLE_TEMP.downstream

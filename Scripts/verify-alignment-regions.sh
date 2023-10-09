@@ -69,7 +69,8 @@ for((EACH_INDEX=0;EACH_INDEX<ARR_LEN;EACH_INDEX++)) do
         stretcher -auto -asequence $REF_TEMP -bsequence $QRY_TEMP -outfile $NEEDLE_TEMP
     fi
 
-        NEEDLE_RESULT=`grep "# Similarity" $NEEDLE_TEMP` #store grep result to a variable
+        #NEEDLE_RESULT=`grep "# Similarity" $NEEDLE_TEMP` #store grep result to a variable
+	NEEDLE_RESULT=`grep "# Identity" $NEEDLE_TEMP` #store grep result to a variable
         REP_ENTRY="${INDEX_ARR[EACH_INDEX]} $NEEDLE_RESULT" #append needle resul to current entry
         REP_ENTRY=${REP_ENTRY//$'\n'/} #Remove newline from string using parameter expansion in bash
     echo $REP_ENTRY >> $OUTPUT_FILE

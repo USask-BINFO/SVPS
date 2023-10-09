@@ -5,9 +5,9 @@ OUTPUT_FILE=$2
 #REF_CHROM_INDEX=$3
 #QRY_CHROM_INDEX=$4
 NEIGHBOUR_SIZE=$3
-#SIMILARITY_THRESH=$4
-REF_GENOME=$4 #$5
-QRY_GENOME=$5 #$6
+SIMILARITY_THRESH=$4
+REF_GENOME=$5 #$5
+QRY_GENOME=$6 #$6
 
 echo "Filtering INV locations to those occurring at same location in both genomes..."
 REF_TEMP="./refINVTemp.fasta"
@@ -134,11 +134,13 @@ for((EACH_INDEX=0;EACH_INDEX<INV_ARR_LEN;EACH_INDEX++)) do
 	#echo "Align seqs complete"
 
 	#Extract similarity scores from both temp files using grep and regex to compare with required similarity threshold
-	#UPSTREAM_SIM=$(head -n50 $NEEDLE_TEMP.upstream | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
-	UPSTREAM_SIM=$(head -n50 <(printf "%s" "$UPSTREAM_ALIGN") | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
+	##UPSTREAM_SIM=$(head -n50 $NEEDLE_TEMP.upstream | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
+	#UPSTREAM_SIM=$(head -n50 <(printf "%s" "$UPSTREAM_ALIGN") | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
+        UPSTREAM_SIM=$(head -n50 <(printf "%s" "$UPSTREAM_ALIGN") | grep "^# Identity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
 	UPSTREAM_SIM=$(awk -v SIMSCORE="$UPSTREAM_SIM" 'BEGIN { printf "%.0f", SIMSCORE }' </dev/null) 
-	#DOWNSTREAM_SIM=$(head -n50 $NEEDLE_TEMP.downstream | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
-        DOWNSTREAM_SIM=$(head -n50 <(printf "%s" "$DOWNSTREAM_ALIGN") | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
+	##DOWNSTREAM_SIM=$(head -n50 $NEEDLE_TEMP.downstream | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
+	#DOWNSTREAM_SIM=$(head -n50 <(printf "%s" "$DOWNSTREAM_ALIGN") | grep "^# Similarity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
+        DOWNSTREAM_SIM=$(head -n50 <(printf "%s" "$DOWNSTREAM_ALIGN") | grep "^# Identity" | grep -E -o "\([1]?[0-9][0-9]\.[0-9][0-9]?%\)" | tr -d '(%)')
 	DOWNSTREAM_SIM=$(awk -v SIMSCORE="$DOWNSTREAM_SIM" 'BEGIN { printf "%.0f", SIMSCORE }' </dev/null) 
 
 	#echo "SIMs: $UPSTREAM_SIM $DOWNSTREAM_SIM"
@@ -169,7 +171,8 @@ STDEV_UP=$(awk -v MEANVAL="$MEAN_ALIGN" '{a[NR]=$14} END {for(i in a)y+=(a[i]-ME
 STDEV_TOTAL=$(awk -v STDEVDOWN="$STDEV_DOWN" -v STDEVUP="$STDEV_UP" 'BEGIN { printf "%.1f", STDEVDOWN<=STDEVUP ? STDEVDOWN: STDEVUP}' </dev/null)
 
 #Setting threshold for INVS filtering to be +1.645 stdev from the mean, assuming normal distribution (implies an alpha of 0.05)(Other options 1.282 for alpha=0.1,1.645 for 0.05, 1.965 for 0.025, and 2.326 for 0.01)
-FILTER_THRESHOLD=$(awk -v MEANRATE="$MEAN_ALIGN" -v STDEVRATE="$STDEV_TOTAL" 'BEGIN { printf "%.0f", MEANRATE+(1.645*STDEVRATE) }' </dev/null)
+#FILTER_THRESHOLD=95 #$(awk -v MEANRATE="$MEAN_ALIGN" -v STDEVRATE="$STDEV_TOTAL" 'BEGIN { printf "%.0f", MEANRATE+(1.645*STDEVRATE) }' </dev/null)
+FILTER_THRESHOLD=$SIMILARITY_THRESH
 
 echo "INV Threshold calculation results.."
 echo "Mean: $MEAN_ALIGN"

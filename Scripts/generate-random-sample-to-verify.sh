@@ -16,7 +16,7 @@ if [ $SAMPLE_SIZE -lt $NUM_COORDS ] # If sample size is less than number of tota
 then
 	for CONTIG in "${NAMES_ARR[@]}"
 	do
-		readarray -t CONTIG_ARR < <(cat $SV_COORDS_FILE | grep "^`echo $CONTIG`")
+		readarray -t CONTIG_ARR < <(cat $SV_COORDS_FILE | grep "^$CONTIG")
 		CONTIG_ARR_LEN="${#CONTIG_ARR[@]}"
                 SAMP_FROM_CHROM=$((SAMPLE_SIZE/CONTIGS_REMAINING)) # Number of samples to select for even distribution across remaining contigs/chroms
 

@@ -73,7 +73,7 @@ for((EACH_INDEX=0;EACH_INDEX<ARR_LEN;EACH_INDEX++)) do #-1
 done
 
 #Print the arrays to file
-TEMP_FILE="./Temp.coord"
+TEMP_FILE="./${INPUT_FILE}.Temp.coord"
 #printf "%s\n" "${RESULT_ARR[@]}" > $TEMP_FILE
 printf "%s" "${RESULT_ARR[@]}" > $TEMP_FILE
 sort -k1,1 -k3,3n -k4,4n -k5,5 -k7,7n -k8,8n $TEMP_FILE > $OUTPUT_FILE
