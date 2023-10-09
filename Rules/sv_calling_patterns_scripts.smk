@@ -127,7 +127,7 @@ rule find_ref_inversion_locations:
                 repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
         params:
                 neighbourSize=config["neighbourSize"],
-                #simThresh=config["invNeighbourSimilarity"],
+                simThresh=config["invNeighbourSimilarity"],
                 refGenome=REF_FILTERED,
                 qryGenome=QRY_FILTERED
         shell:
@@ -156,7 +156,7 @@ rule find_qry_inversion_locations:
                 repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
         params:
                 neighbourSize=config["neighbourSize"],
-                #simThresh=config["invNeighbourSimilarity"],
+                simThresh=config["invNeighbourSimilarity"],
                 refGenome=QRY_FILTERED,
                 qryGenome=REF_FILTERED                
         shell:
@@ -202,17 +202,31 @@ rule find_ref_transpos_locations:
         input:
                 str(SVPS_REF_PREFIX + ".noOverlap.filtered.coords")
         output:
-                str(SVPS_REF_PREFIX + ".TRANSPOS.final.coords")
+                #str(SVPS_REF_PREFIX + ".TRANSPOS.final.coords")
+                str(SVPS_REF_PREFIX + ".noOverlap.filtered.coords.NeighbourAligns")
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
         params:
                 neighbourSize=config["neighbourSize"],
-                #simThresh=config["transposNeighbourSimilarity"],
+                simThresh=config["transposNeighbourSimilarity"],
                 refGenome=REF_FILTERED,
                 qryGenome=QRY_FILTERED
         shell:
                 "bash ./Scripts/find-transpos.sh {input} {output} {params}"
+
+rule filter_ref_transpos_locations:
+        input:
+                str(SVPS_REF_PREFIX + ".noOverlap.filtered.coords.NeighbourAligns")
+        output:
+                str(SVPS_REF_PREFIX + ".TRANSPOS.final.coords")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                simThresh=config["transposNeighbourSimilarity"]
+        shell:
+                "bash ./Scripts/transpos-filtering.sh {input} {output} {params}"
                 
 rule find_qry_non_overlapping_locations:
         input:
@@ -254,14 +268,28 @@ rule find_qry_transpos_locations:
         input:
                 str(SVPS_QRY_PREFIX + ".noOverlap.filtered.coords")
         output:
-                str(SVPS_QRY_PREFIX + ".TRANSPOS.final.coords")
+                #str(SVPS_QRY_PREFIX + ".TRANSPOS.final.coords")
+                str(SVPS_QRY_PREFIX + ".noOverlap.filtered.coords.NeighbourAligns")
         threads: 1
         benchmark:
                 repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
         params:
                 neighbourSize=config["neighbourSize"],
-                #simThresh=config["transposNeighbourSimilarity"],
+                simThresh=config["transposNeighbourSimilarity"],
                 refGenome=QRY_FILTERED,
                 qryGenome=REF_FILTERED
         shell:
                 "bash ./Scripts/find-transpos.sh {input} {output} {params}"
+
+rule filter_qry_transpos_locations:
+        input:
+                str(SVPS_QRY_PREFIX + ".noOverlap.filtered.coords.NeighbourAligns")
+        output:
+                str(SVPS_QRY_PREFIX + ".TRANSPOS.final.coords")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/SVPS.SVCalling.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                simThresh=config["transposNeighbourSimilarity"]
+        shell:
+                "bash ./Scripts/transpos-filtering.sh {input} {output} {params}"
