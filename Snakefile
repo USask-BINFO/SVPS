@@ -128,6 +128,7 @@ rule all:
                 str(config["verifyAlignFolder"] + "/REF/DUP-SimilarityResults.out"),
                 str(config["verifyAlignFolder"] + "/REF/INV-SimilarityResults.out"),
                 str(config["verifyAlignFolder"] + "/REF/TRANS-SimilarityResults.out"),
+                str(config["verifyAlignFolder"] + "/REF/TRANSPOS-SimilarityResults.out"),
 #                str(config["verifyAlignFolder"] + "/REF/" + REF_SAMP_NAME + "minimap2.gapRegions.depth"),
                 ## Final Outputs
                 str(SVPS_REF_PREFIX + ".ALL.fromMerged.bed"),

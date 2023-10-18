@@ -178,6 +178,66 @@ rule verify_qry_TRANS_predictions:
         shell:
                 "bash ./Scripts/verify-alignment-regions.sh {params.refGenome} {params.qryGenome} {input} {params.outputDir} {params.svType}"
 
+rule build_ref_TRANSPOS_verification_sample:
+        input:
+                chromNames=str(config["genomesFolder"] + "/RefSeqNamesToInclude.txt"),
+                inputCoords=str(SVPS_REF_PREFIX + ".TRANSPOS.final.noN.coords")
+        output:
+                str(SVPS_REF_PREFIX + ".TRANSPOS.verifySample.coords")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/VerifyAlignment.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                config["verificationSampSize"]
+        shell:
+                "bash ./Scripts/generate-random-sample-to-verify.sh {input} {output} {params}"
+
+rule verify_ref_TRANSPOS_predictions:
+        input:
+                str(SVPS_REF_PREFIX + ".TRANSPOS.verifySample.coords")
+        output:
+                str(config["verifyAlignFolder"] + "/REF/TRANSPOS-SimilarityResults.out")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/VerifyAlignment.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                refGenome=REF_FILTERED,
+                qryGenome=QRY_FILTERED,
+                outputDir=str(config["verifyAlignFolder"]+"/REF"),
+                svType="TRANSPOS"
+        shell:
+                "bash ./Scripts/verify-alignment-regions.sh {params.refGenome} {params.qryGenome} {input} {params.outputDir} {params.svType}"
+
+rule build_qry_TRANSPOS_verification_sample:
+        input:
+                chromNames=str(config["genomesFolder"] + "/QrySeqNamesToInclude.txt"),
+                inputCoords=str(SVPS_QRY_PREFIX + ".TRANSPOS.final.noN.coords")
+        output:
+                str(SVPS_QRY_PREFIX + ".TRANSPOS.verifySample.coords")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/VerifyAlignment.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                config["verificationSampSize"]
+        shell:
+                "bash ./Scripts/generate-random-sample-to-verify.sh {input} {output} {params}"
+
+rule verify_qry_TRANSPOS_predictions:
+        input:
+                str(SVPS_QRY_PREFIX + ".TRANSPOS.verifySample.coords")
+        output:
+                str(config["verifyAlignFolder"] + "/QRY/TRANSPOS-SimilarityResults.out")
+        threads: 1
+        benchmark:
+                repeat(str(BENCH_DIR + "/VerifyAlignment.benchmarking.tsv"), BENCH_REPEAT)
+        params:
+                refGenome=QRY_FILTERED,
+                qryGenome=REF_FILTERED,
+                outputDir=str(config["verifyAlignFolder"]+"/QRY"),
+                svType="TRANSPOS"
+        shell:
+                "bash ./Scripts/verify-alignment-regions.sh {params.refGenome} {params.qryGenome} {input} {params.outputDir} {params.svType}"
+
 rule build_ref_DEL_verification_sample:
         input:
                 chromNames=str(config["genomesFolder"] + "/RefSeqNamesToInclude.txt"),
