@@ -1,47 +1,23 @@
-#### CFPB Open Source Project Template Instructions
+# SVPS
 
-1. Create a new project.
-2. [Copy these files into the new project](#installation)
-3. Update the README, replacing the contents below as prescribed.
-4. Add any libraries, assets, or hard dependencies whose source code will be included
-   in the project's repository to the _Exceptions_ section in the [TERMS](TERMS.md).
-  - If no exceptions are needed, remove that section from TERMS.
-5. If working with an existing code base, answer the questions on the [open source checklist](opensource-checklist.md)
-6. Delete these instructions and everything up to the _Project Title_ from the README.
-7. Write some great software and tell people about it.
+## Description
+Multi-stage Snakemake pipeline that performs pairwise structural variant (SV) calling from MUMmer4 whole genome alignment (WGA) results. In addition, this pipeline evaluates a subsample of all SV results using a second aligner using automated methods that rely on alignment PID or alignment depth. 
+This workflow simplifies the generation of WGA-based SV results to help SV studies overcome the read length limitations that reduce SV calling accuracy.
 
-> Keep the README fresh! It's the first thing people see and will make the initial impression.
+  - **Status**:  Version 1.0.2 - [CHANGELOG](CHANGELOG.md).
 
-## Installation
+## Supported formats
 
-To install all of the template files, run the following script from the root of your project's directory:
+SVPS requires a chromosome-level genome assembly from both a reference and query sample in FASTA format.
+The input genome assembly files must be pre-downloaded by the user and the path information must be updated in the configuration file prior to execution. 
+After execution, SVPS outputs SV result files in the Browser Extensible Data (BED) format which details the predicted SVs' coordinates and in Variant Call Format (VCF).
+ 
+## Dependencies
 
-```
-bash -c "$(curl -s https://raw.githubusercontent.com/CFPB/development/main/open-source-template.sh)"
-```
+SVPS is a Snakemake pipeline that incorporates multiple third party software tools. Many of these tools are installable as conda package so the pipeline includes
+a conda configuration file for user convenience.
 
-----
-
-# Project Title
-
-**Description**:  Put a meaningful, short, plain-language description of what
-this project is trying to accomplish and why it matters.
-Describe the problem(s) this project solves.
-Describe how this software can improve the lives of its audience.
-
-Other things to include:
-
-  - **Technology stack**: Indicate the technological nature of the software, including primary programming language(s) and whether the software is intended as standalone or as a module in a framework or other ecosystem.
-  - **Status**:  Alpha, Beta, 1.1, etc. It's OK to write a sentence, too. The goal is to let interested people know where this project is at. This is also a good place to link to the [CHANGELOG](CHANGELOG.md).
-  - **Links to production or demo instances**
-  - Describe what sets this apart from related-projects. Linking to another doc or page is OK if this can't be expressed in a sentence or two.
-
-
-**Screenshot**: If the software has visual components, place a screenshot after the description; e.g.,
-
-![](https://raw.githubusercontent.com/cfpb/open-source-project-template/main/screenshot.png)
-
-
+The full list of required software is provided below and includes version information for the software versions that were used during testing:
 
 #### Dependencies installed through the provided conda configuration file
 
@@ -71,9 +47,14 @@ Additionally, the pipeline must be launched from an environment with Snakemake i
 
 ## Installation
 
-Detailed instructions on how to install, configure, and get the project running.
-This should be frequently tested to ensure reliability. Alternatively, link to
-a separate [INSTALL](INSTALL.md) document.
+As a Snakemake workflow that employs external tools, the installation only involves cloning this repository:
+
+```
+git clone https://github.com/USask-BINFO/SVPS
+```
+
+After cloning the SVPS repository, the conda dependencies will be loaded by Snakemake automatically during execution based on the included conda env configuration file.
+For the remaining dependencies please consult the installation instructions provided by each tool's github/manual and ensure these tools are added to your PATH variable.
 
 ## Configuration
 #### Input Files Configuration
@@ -149,6 +130,12 @@ paper)
 
 ##### Alignment Verification Sample Configurations
   - `verificationSampSize`: 1000 # Total number of coord entries for each SV type to verify
+  - `indexInterval`: 100000 #Index interval when indexing samtools depth output
+
+##### Params for determining if SVs occur at same location (based on same neighbouring/flanking genetic contents)
+  - `neighbourSize`: 10000 #Consider 20x avg/median gene size
+  - `invNeighbourSimilarity`: 90 # Integer value of required similarity rate (%) for bash comparison (seeking same neighbours between samples)
+  - `transposNeighbourSimilarity`: 50 # Integer value of maximum similarity rate (%) for bash comparison (seeking different neighbours to identify movement)
 
 ##### BEDTools Configurations
   - `maxDistApart`: 0 # Amount of separation allowed between entries that should still be merged (0 means they must be either overlapping or side-by-side) (EX:0)
@@ -221,7 +208,7 @@ Note: For additional execution stats, Snakemake supports a `--stat <statsFile>` 
 
 ## Known issues
 
-  - None
+List of current issues
 
 ## Getting help
 
@@ -230,11 +217,13 @@ If you have questions, concerns, bug reports, etc, please file an issue in this 
 
 ## Future work
 
-This section should detail why people should get involved and describe key areas you are
-currently focusing on; e.g., trying to get feedback on features, fixing certain bugs, building
-important pieces, etc.
+Have suggestions on how the software can be improved? Please contact `malcolm.todd@usask.ca` with your suggestions/recommendations!
 
-General instructions on _how_ to contribute should be stated with a link to [CONTRIBUTING](CONTRIBUTING.md).
+Current worklist:
+ - Update Rules and Scripts to use zipped data inputs to improve memory footprint
+ - Research parallelization options/caps for each tool and refine threads argument for each rule
+ - Add Docstrings to Snakemake Rules files to improve internal documentation for users
+ - Refine SV Pattern Scan sub-algorithms to improve sensitivity and to accept less stringent chromosome identifier requirements
 
 
 ----
