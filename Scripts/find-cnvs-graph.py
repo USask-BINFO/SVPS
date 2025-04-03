@@ -193,8 +193,8 @@ def removeClosestEntryFromEachCNV(cnvRegions):
 
 	return cnvEntriesOnly
 
-def removeFurthestEntriesFromEachCNV(cnvRegions):
-        cnvEntriesOnly=[]
+def selectFurthestEntriesFromEachCNV(cnvRegions):
+        outlierEntriesOnly=[]
 
         for key in cnvRegions.keys():
                 currEntriesList=cnvRegions[key]["Entries"].copy()
@@ -212,9 +212,56 @@ def removeFurthestEntriesFromEachCNV(cnvRegions):
                         currRefEntries=[]
                         currRefEntries.append(currEntriesList.pop(largestDistIndex))
                         sepDistList.pop(largestDistIndex)
-                        cnvEntriesOnly=cnvEntriesOnly+currRefEntries
+                        outlierEntriesOnly=outlierEntriesOnly+currRefEntries
 
-        return cnvEntriesOnly
+        return outlierEntriesOnly
+
+def entriesAreNested(firstEntryStart,firstEntryEnd,secondEntryStart,secondEntryEnd):
+	#Test if either entry is fully nested or /overlapped by the other
+	return (secondEntryStart <= firstEntryStart and firstEntryStart <= secondEntryStart) or (firstEntryStart <= secondEntryStart and secondEntryEnd <= firstEntryEnd)
+
+
+def combineNestedEntries(outlierCNVEntries):
+	cnvEntries=[]
+	currentIndex=0
+	while currentIndex < len(outlierCNVEntries)-1: # last index should get checked by the N-1 being tested (needs there to be a nextEntry)
+		#Extract coord range for current entry
+		nextIndex=currentIndex+1
+		cnvEntry=outlierCNVEntries[currentIndex]
+		currentRStart=cnvEntry[2]
+		currentREnd=cnvEntry[3]
+		currentQStart=cnvEntry[6]
+		currentQEnd=cnvEntry[7]
+
+		#Extract first next entry
+		nextEntry=outlierCNVEntries[nextIndex]
+		nextRStart=nextEntry[2]
+		nextREnd=nextEntry[3]
+		nextQStart=nextEntry[6]
+		nextQEnd=nextEntry[7]
+
+		#Test the next entries until they are no longer nested in both samples or the end of the entries is reached
+		cnvEntryRange=[]
+		while entriesAreNested(currentRStart,currentREnd,nextRStart,nextREnd) and entriesAreNested(currentQStart,currentQEnd,nextQStart,nextQEnd)  and (nextIndex < len(outlierCNVEntries)): #terminate if entries aren't nested or reached the end of entries
+			#Entries are nested or fully overlapping in both samples, so update CNV entry if the next entry was the larger of the two
+			if nextEntry[8] > cnvEntry[8]:
+				cnvEntry=nextEntry
+				#Update data prior to next loop iteration's test
+				currentRStart=cnvEntry[2]
+				currentREnd=cnvEntry[3]
+				currentQStart=cnvEntry[6]
+				currentQEnd=cnvEntry[7]
+			# Update next entry to the next index so it cant be tested again in case there are multiple
+			nextIndex=nextIndex+1
+			nextEntry=outlierCNVEntries[nextIndex]
+			nextRStart=nextEntry[2]
+			nextREnd=nextEntry[3]
+			nextQStart=nextEntry[6]
+			nextQEnd=nextEntry[7]
+		#Loop ended, no need to recheck entries prior to nextIndex, so update to avoid redundant checks
+		currentIndex=nextIndex
+		cnvEntries.append(cnvEntry)
+	return cnvEntries
 
 
 def main(argv):
@@ -229,7 +276,9 @@ def main(argv):
 	print("Identifying CNV candidates!..") #Debug
 	cnvCandidates=findCompsWithImbalanceInUniqs(compSeqs)
 	print("Finding entries that were furthest apart representing the CNV locations!..") #Debug
-	cnvEntries=removeFurthestEntriesFromEachCNV(cnvCandidates) #removeClosestEntryFromEachCNV(cnvCandidates)
+	outlierEntries=selectFurthestEntriesFromEachCNV(cnvCandidates) #removeClosestEntryFromEachCNV(cnvCandidates)
+	print("Filtering nested entries!..")
+	cnvEntries=combineNestedEntries(outlierEntries)
 
 	##Debugging
 	#for key in nodesDict.keys():
