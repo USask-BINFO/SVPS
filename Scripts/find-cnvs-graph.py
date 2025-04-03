@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-
+from collections import deque
 
 #Container for key alignment information to be tested when building graph components
 class AlignmentNode:
@@ -42,9 +42,10 @@ def parseAlignmentsToGraphNodes(coordFile):
                         svLen=int(currentFields[8])
                         svType=currentFields[9]
                         simScore=currentFields[10]
-                        newNode=AlignmentNode(nodeID,refChrom,refStart,refEnd,refDir,qryChrom,qryStart,qryEnd,qryDir,svLen,svType,simScore)
-                        nodeDict[newNode]=[] #AlignmentNode(nodeID,refChrom,refStart,refEnd,refDir,qryChrom,qryStart,qryEnd,qryDir)
-                        nodeID=nodeID+1
+                        if (refDir==qryDir) and (refChrom == qryChrom): #DUPs should share the same orientation to avoid spurious associations with reverse complement flukes
+                            newNode=AlignmentNode(nodeID,refChrom,refStart,refEnd,refDir,qryChrom,qryStart,qryEnd,qryDir,svLen,svType,simScore)
+                            nodeDict[newNode]=[] #AlignmentNode(nodeID,refChrom,refStart,refEnd,refDir,qryChrom,qryStart,qryEnd,qryDir)
+                            nodeID=nodeID+1
                 nodeList=list(nodeDict.keys())
                 numNodes=len(nodeList)
                 for i in range(numNodes):
@@ -84,6 +85,39 @@ def recGraphTraversal(nodeDict):
 
 	return compDict
 
+def queueGraphTraversal(nodeDict):
+	compID=1
+	compDict={}
+	visited=set()
+	currentComp=[]
+	for firstNodeCandidate in nodeDict.keys():
+		#Test if a node already belongs to a component, otherwise start traversing all connected node
+		if firstNodeCandidate not in visited:
+			nodeQueue=deque([firstNodeCandidate])
+			seenInComponent={firstNodeCandidate} #New set to track nodes already in the component to prevent cycles from causing nodes to be added multiple times
+
+			#Traverse all connected nodes in the component
+			while nodeQueue:
+				currentNode=nodeQueue.popleft()
+				if currentNode not in visited:
+					currentComp.append(currentNode)
+					visited.add(currentNode)
+
+					#Process all connected nodes for the current node and add any unseen nodes to the queue (breadth first)
+					for connectedNode in nodeDict[currentNode]:
+						if (connectedNode not in visited) and (connectedNode not in seenInComponent):
+							nodeQueue.append(connectedNode)
+							seenInComponent.add(connectedNode)
+
+			#When we get here, the queue is empty so create a new component before the for loop starts over
+			print("Traveral complete since nodeQueue is empty! Adding component of length",len(currentComp),"to Dict and creating a new one...") #Debug
+			compDict[compID]=currentComp
+			currentComp=[]
+			compID=compID+1
+
+	#For loop complete, return the constructed dictionary containing all components
+	return compDict
+
 
 def extractUniqCoordFromComponents(compDict,nodeDict):
 	uniqSeqsPerComp={}
@@ -96,6 +130,7 @@ def extractUniqCoordFromComponents(compDict,nodeDict):
 			refKey=(node.rChrom,node.rStart,node.rEnd)
 			qryKey=(node.qChrom,node.qStart,node.qEnd)
 			fullEntry=[node.rChrom,node.rOrientation,node.rStart,node.rEnd,node.qChrom,node.qOrientation,node.qStart,node.qEnd,node.svLen,node.svType,node.simScore]
+
 			if(refKey not in uniqSeqsPerComp[key]["R"]):
 				uniqSeqsPerComp[key]["R"].append(refKey)
 				if(fullEntry not in uniqSeqsPerComp[key]["Entries"]):
@@ -158,17 +193,43 @@ def removeClosestEntryFromEachCNV(cnvRegions):
 
 	return cnvEntriesOnly
 
+def removeFurthestEntriesFromEachCNV(cnvRegions):
+        cnvEntriesOnly=[]
+
+        for key in cnvRegions.keys():
+                currEntriesList=cnvRegions[key]["Entries"].copy()
+                sepDistList=[]
+
+		#Calculate the distance between the start locations in R and Q
+                for entry in currEntriesList:
+                        refStart=entry[2]
+                        qryStart=entry[6]
+                        sepDistList.append(abs(refStart-qryStart))
+
+		# Extract an entry with the largest distance for each copy number imbalance (ex: 2 in the ref and 4 in the qry would be abs(2-4)=2)
+                for numExtraCopies in range( abs( len(cnvRegions[key]["R"]) - len(cnvRegions[key]["Q"]) ) ):
+                        largestDistIndex=sepDistList.index(max(sepDistList))
+                        currRefEntries=[]
+                        currRefEntries.append(currEntriesList.pop(largestDistIndex))
+                        sepDistList.pop(largestDistIndex)
+                        cnvEntriesOnly=cnvEntriesOnly+currRefEntries
+
+        return cnvEntriesOnly
 
 
 def main(argv):
 	coordsFile=argv[0]
 	#qryCoordsFile=argv[1]
-
+	print("Building graph node dictionary!..") #Debug
 	nodesDict=parseAlignmentsToGraphNodes(coordsFile)
-	compDict=recGraphTraversal(nodesDict)
+	print("Building connected components dictionary!..") #Debug
+	compDict=queueGraphTraversal(nodesDict) #recGraphTraversal(nodesDict)
+	print("Extracting unique coordinate locations!..") #Debug
 	compSeqs=extractUniqCoordFromComponents(compDict,nodesDict)
+	print("Identifying CNV candidates!..") #Debug
 	cnvCandidates=findCompsWithImbalanceInUniqs(compSeqs)
-	cnvEntries=removeClosestEntryFromEachCNV(cnvCandidates)
+	print("Finding entries that were furthest apart representing the CNV locations!..") #Debug
+	cnvEntries=removeFurthestEntriesFromEachCNV(cnvCandidates) #removeClosestEntryFromEachCNV(cnvCandidates)
 
 	##Debugging
 	#for key in nodesDict.keys():
