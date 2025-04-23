@@ -38,7 +38,7 @@ rule find_ref_insertion_gap_locations:
                 svType="INS",
                 minSize=config["svMinSize"]
         shell:
-                "bash ./Scripts/find-gaps.sh {params.svType} {input} {output} {params.minSize}"
+                "bash ./Scripts/find-INS-gaps.sh {params.svType} {input} {output} {params.minSize}"
 
 rule find_qry_insertion_gap_locations:
         input:
@@ -52,7 +52,7 @@ rule find_qry_insertion_gap_locations:
                 svType="INS",
                 minSize=config["svMinSize"]
         shell:
-                "bash ./Scripts/find-gaps.sh {params.svType} {input} {output} {params.minSize}"
+                "bash ./Scripts/find-INS-gaps.sh {params.svType} {input} {output} {params.minSize}"
 
 rule find_ref_repeated_locations:
         input:
