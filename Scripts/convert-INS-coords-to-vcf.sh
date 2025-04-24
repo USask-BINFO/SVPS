@@ -12,6 +12,7 @@ VCF_ARR=()
 
 INS_COUNT=1
 for((EACH_INDEX=0;EACH_INDEX<ARR_LEN;EACH_INDEX++)) do
+	echo "Starting entry " $INS_COUNT " out of " $ARR_LEN
         CURR_ROW_ARR=( ${INDEX_ARR[$EACH_INDEX]} )
 
         REF_CHR=${CURR_ROW_ARR[0]}

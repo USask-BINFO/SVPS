@@ -42,7 +42,7 @@ rule find_ref_insertion_gap_locations:
 
 rule find_qry_insertion_gap_locations:
         input:
-                str(MUMMER_REF_PREFIX + ".reformatted.coords")
+                str(MUMMER_REF_PREFIX + ".swapped.filtered.coords")
         output:
                 str(SVPS_QRY_PREFIX + ".INS.final.coords")
         threads: 1
